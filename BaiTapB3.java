@@ -288,14 +288,18 @@ public class BaiTapB3 {
 
         // Phuong thuc tim kiem nhan vien theo luong
         public static void timKiemNhanVienTheoLuong(List<NhanVienCty> danhSach, Double luongTimKiem) {
+            boolean found = false;
             for (NhanVienCty nv : danhSach) {
-                if (nv.getThuNhap()==(luongTimKiem)) {
+                if (nv.getThuNhap() == luongTimKiem) {
                     System.out.println("Tim thay nhan vien:");
                     nv.xuat();
-                    return;
+                    System.out.println("---");
+                    found = true;
                 }
             }
-            System.out.println("Khong tim thay nhan vien co luong = " + luongTimKiem);
+            if (!found) {
+                System.out.println("Khong tim thay nhan vien co luong = " + luongTimKiem);
+            }
         }
 
         // Phuong thuc xoa nhan vien theo ma
