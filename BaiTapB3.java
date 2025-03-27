@@ -287,7 +287,7 @@ public class BaiTapB3 {
         }
 
         // Phuong thuc tim kiem nhan vien theo luong
-        public static void timKiemNhanVien(List<NhanVienCty> danhSach, Double luongTimKiem) {
+        public static void timKiemNhanVienTheoLuong(List<NhanVienCty> danhSach, Double luongTimKiem) {
             for (NhanVienCty nv : danhSach) {
                 if (nv.getThuNhap()==(luongTimKiem)) {
                     System.out.println("Tim thay nhan vien:");
@@ -395,7 +395,7 @@ public class BaiTapB3 {
                     case 3:
                         System.out.print("Nhap luong nhan vien can tim: ");
                         Double luongTimKiem = scanner.nextDouble();
-                        timKiemNhanVien(danhSach, luongTimKiem);
+                        timKiemNhanVienTheoLuong(danhSach, luongTimKiem);
                         break;
                     case 4:
                         System.out.print("Nhap ma nhan vien can xoa: ");
