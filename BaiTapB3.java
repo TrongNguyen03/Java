@@ -286,6 +286,18 @@ public class BaiTapB3 {
             System.out.println("Khong tim thay nhan vien co ma " + maTimKiem);
         }
 
+        // Phuong thuc tim kiem nhan vien theo luong
+        public static void timKiemNhanVien(List<NhanVienCty> danhSach, Double luongTimKiem) {
+            for (NhanVienCty nv : danhSach) {
+                if (nv.getThuNhap()==(luongTimKiem)) {
+                    System.out.println("Tim thay nhan vien:");
+                    nv.xuat();
+                    return;
+                }
+            }
+            System.out.println("Khong tim thay nhan vien co luong = " + luongTimKiem);
+        }
+
         // Phuong thuc xoa nhan vien theo ma
         public static void xoaNhanVien(List<NhanVienCty> danhSach, String maNhanVien) {
             for (NhanVienCty nv : danhSach) {
@@ -360,11 +372,12 @@ public class BaiTapB3 {
                 System.out.println("\n===== MENU CHUC NANG =====");
                 System.out.println("1. Xuat danh sach nhan vien");
                 System.out.println("2. Tim kiem nhan vien theo ma");
-                System.out.println("3. Xoa nhan vien theo ma");
-                System.out.println("4. Cap nhat thong tin nhan vien");
-                System.out.println("5. Sap xep danh sach nhan vien theo ten");
-                System.out.println("6. Sap xep danh sach nhan vien theo thu nhap");
-                System.out.println("7. Xuat top 5 nhan vien co thu nhap cao nhat");
+                System.out.println("3. Tim kiem nhan vien theo luong");
+                System.out.println("4. Xoa nhan vien theo ma");
+                System.out.println("5. Cap nhat thong tin nhan vien");
+                System.out.println("6. Sap xep danh sach nhan vien theo ten");
+                System.out.println("7. Sap xep danh sach nhan vien theo thu nhap");
+                System.out.println("8. Xuat top 5 nhan vien co thu nhap cao nhat");
                 System.out.println("0. Thoat");
                 System.out.print("Chon chuc nang: ");
                 int chucNang = scanner.nextInt();
@@ -380,28 +393,33 @@ public class BaiTapB3 {
                         timKiemNhanVien(danhSach, maTimKiem);
                         break;
                     case 3:
+                        System.out.print("Nhap luong nhan vien can tim: ");
+                        Double luongTimKiem = scanner.nextDouble();
+                        timKiemNhanVien(danhSach, luongTimKiem);
+                        break;
+                    case 4:
                         System.out.print("Nhap ma nhan vien can xoa: ");
                         String maXoa = scanner.nextLine();
                         xoaNhanVien(danhSach, maXoa);
-                        System.out.println("+====Danh sach sau khi xoa====+");
-                        xuatDanhSach(danhSach);
-                        break;
-                    case 4:
-                        System.out.print("Nhap ma nhan vien can cap nhat: ");
-                        String maCapNhat = scanner.nextLine();
-                        capNhatNhanVien(danhSach, scanner, maCapNhat, luongCoBan);
-                        System.out.println("+====Danh sach sau khi cap nhat====+");
+                        System.out.println("+=====Danh sach sau khi xoa=====+");
                         xuatDanhSach(danhSach);
                         break;
                     case 5:
-                        sapXepNhanVien(danhSach);
+                        System.out.print("Nhap ma nhan vien can cap nhat: ");
+                        String maCapNhat = scanner.nextLine();
+                        capNhatNhanVien(danhSach, scanner, maCapNhat, luongCoBan);
+                        System.out.println("+=====Danh sach sau khi cap nhat=====+");
                         xuatDanhSach(danhSach);
                         break;
                     case 6:
-                        sapXepNhanVienTN(danhSach);
+                        sapXepNhanVien(danhSach);
                         xuatDanhSach(danhSach);
                         break;
                     case 7:
+                        sapXepNhanVienTN(danhSach);
+                        xuatDanhSach(danhSach);
+                        break;
+                    case 8:
                         xuatTop5ThuNhap(danhSach);
                         break;
                     case 0:
