@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,11 +15,11 @@ import java.util.List;
 public class BaiTapB6QLNV {
 
     static class NhanVien {
-        private String maNhanVien;
-        private String hoTen;
-        private int tuoi;
-        private String email;
-        private double luongCoBan;
+        protected String maNhanVien;
+        protected String hoTen;
+        protected int tuoi;
+        protected String email;
+        protected double luongCoBan;
 
         public NhanVien(String maNhanVien, String hoTen, int tuoi, String email, double luongCoBan) {
             this.maNhanVien = maNhanVien;
@@ -252,7 +253,11 @@ public class BaiTapB6QLNV {
                             JTextField tfHoTenMoi = new JTextField(nv.hoTen);
                             JTextField tfTuoiMoi = new JTextField(String.valueOf(nv.tuoi));
                             JTextField tfEmailMoi = new JTextField(nv.email);
-                            JTextField tfLuongMoi = new JTextField(String.valueOf(df.format(nv.luongCoBan)));
+
+                            NumberFormat numberFormat = NumberFormat.getNumberInstance();
+                            JFormattedTextField tfLuongMoi = new JFormattedTextField(numberFormat);
+                            tfLuongMoi.setValue(nv.luongCoBan);
+
 
                             panel.add(new JLabel("Họ Tên mới:"));
                             panel.add(tfHoTenMoi);
@@ -269,7 +274,7 @@ public class BaiTapB6QLNV {
                                     String hoTenMoi = tfHoTenMoi.getText().trim();
                                     String tuoiMoiStr = tfTuoiMoi.getText().trim();
                                     String emailMoi = tfEmailMoi.getText().trim();
-                                    String luongMoiStr = tfLuongMoi.getText().trim();
+                                    String luongMoiStr = tfLuongMoi.getText().trim().replace(",", ""); // Loại bỏ dấu phẩy trước khi chuyển đổi
 
                                     if (!hoTenMoi.matches("[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯưẠ-ỹ\\s]+")) {
                                         JOptionPane.showMessageDialog(frame, "Họ tên chỉ được chứa chữ cái và khoảng trắng!");
@@ -282,7 +287,7 @@ public class BaiTapB6QLNV {
                                     }
 
                                     int tuoiMoi = Integer.parseInt(tuoiMoiStr);
-                                    double luongMoi = Double.parseDouble(luongMoiStr);
+                                    double luongMoi = ((Number) tfLuongMoi.getValue()).doubleValue();
 
                                     nv.hoTen = hoTenMoi;
                                     nv.tuoi = tuoiMoi;
@@ -304,6 +309,7 @@ public class BaiTapB6QLNV {
                     JOptionPane.showMessageDialog(frame, "Không tìm thấy nhân viên có mã " + maNV);
                 }
             });
+
 
             // Sự kiện nút "Tìm theo mã"
             btnTimKiem.addActionListener(e -> {
