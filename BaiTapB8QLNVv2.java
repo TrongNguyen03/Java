@@ -474,8 +474,8 @@ public class BaiTapB8QLNVv2 {
                 String soLuongStr = JOptionPane.showInputDialog(frame, "Nhập số lượng nhân viên cần tạo:");
                 try {
                     int soLuong = Integer.parseInt(soLuongStr);
-                    if (soLuong>1000){
-                        JOptionPane.showMessageDialog(null, "Vượt quá số lượng cho phép!");
+                    if (soLuong>1000 || soLuong<=0){
+                        JOptionPane.showMessageDialog(null, "Vượt quá số lượng cho phép hoặc dưới cho phép!");
                     }
                     else {
                         JFileChooser fileChooser = new JFileChooser();
@@ -579,7 +579,7 @@ public class BaiTapB8QLNVv2 {
                 String maNV= String.format("%03d",i);
                 String hoTen = hoTenMau[random.nextInt(hoTenMau.length)];
                 int tuoi = random.nextInt(50) + 18;
-                String email = "user" + maNV + "@example.com";
+                String email = "user" + maNV + "@gmail.com";
                 double luong = (random.nextInt(30) + 5) * 1000000; // Lương từ 5-35 triệu
                 String line = maNV + "," + hoTen + "," + tuoi + "," + email + "," + luong;
 
