@@ -6,14 +6,15 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.Date;
+import java.util.List;
 
 import java.sql.*;
 public class MainQLNV {
@@ -59,17 +60,16 @@ public class MainQLNV {
 
         }
 
-
-
-
-
         public static void main(String[] args) {
 
             SwingUtilities.invokeLater(() -> {
+
+
                 JFrame frame = new JFrame("Quản Lý Nhân Viên");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setSize(1000, 630);
                 frame.setLayout(null);
+
 
                 // Tiêu đề và đồng hồ hiển thị
                 JLabel lblTitle = new JLabel("QUẢN LÝ NHÂN VIÊN", SwingConstants.CENTER);
@@ -258,7 +258,6 @@ public class MainQLNV {
 
                         conn.close();
 
-                        JOptionPane.showMessageDialog(frame, "Thêm nhân viên thành công!");
                         tfMaNV.setText("");
                         tfHoTen.setText("");
                         tfTuoi.setText("");
@@ -288,6 +287,7 @@ public class MainQLNV {
 
                         writer.write("Mã NV,Họ Tên,Tuổi,Email,Lương (VND)");
                         writer.newLine();
+                        DecimalFormat df = new DecimalFormat("#.###");
 
                         while (rs.next()) {
                             String ma = rs.getString("ma_nv");
@@ -296,7 +296,8 @@ public class MainQLNV {
                             String email = rs.getString("email");
                             double luong = rs.getDouble("luong");
 
-                            writer.write(ma + "," + ten + "," + tuoi + "," + email + "," + luong);
+
+                            writer.write(ma + "," + ten + "," + tuoi + "," + email + "," + df.format(luong));
                             writer.newLine();
                         }
 
@@ -367,73 +368,92 @@ public class MainQLNV {
                     }
 
                 });
-//
-//                // Cập nhật thông tin nhân viên theo mã
-//                btnCapNhat.addActionListener(e -> {
-//                    String maNV = JOptionPane.showInputDialog(frame, "Nhập mã nhân viên cần cập nhật:");
-//                    if (maNV != null) {
-//                        for (NhanVien nv : danhSachNhanVien) {
-//                            if (nv.maNhanVien.equals(maNV)) {
-//                                JPanel panel = new JPanel(new GridLayout(0, 2, 5, 5));
-//
-//                                JTextField tfHoTenMoi = new JTextField(nv.hoTen);
-//                                JTextField tfTuoiMoi = new JTextField(String.valueOf(nv.tuoi));
-//                                JTextField tfEmailMoi = new JTextField(nv.email);
-//
-//                                NumberFormat numberFormat = NumberFormat.getNumberInstance();
-//                                JFormattedTextField tfLuongMoi = new JFormattedTextField(numberFormat);
-//                                tfLuongMoi.setValue(nv.luongCoBan);
-//
-//                                panel.add(new JLabel("Họ Tên mới:"));
-//                                panel.add(tfHoTenMoi);
-//                                panel.add(new JLabel("Tuổi mới:"));
-//                                panel.add(tfTuoiMoi);
-//                                panel.add(new JLabel("Email mới:"));
-//                                panel.add(tfEmailMoi);
-//                                panel.add(new JLabel("Lương mới:"));
-//                                panel.add(tfLuongMoi);
-//
-//                                int result = JOptionPane.showConfirmDialog(frame, panel, "Cập nhật thông tin", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-//                                if (result == JOptionPane.OK_OPTION) {
-//                                    try {
-//                                        String hoTenMoi = tfHoTenMoi.getText().trim();
-//                                        String tuoiMoiStr = tfTuoiMoi.getText().trim();
-//                                        String emailMoi = tfEmailMoi.getText().trim();
-//                                        String luongMoiStr = tfLuongMoi.getText().trim().replace(",", "");
-//
-//                                        if (!hoTenMoi.matches("[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯưẠ-ỹ\\s]+")) {
-//                                            JOptionPane.showMessageDialog(frame, "Họ tên chỉ được chứa chữ cái và khoảng trắng!");
-//                                            return;
-//                                        }
-//
-//                                        if (!emailMoi.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
-//                                            JOptionPane.showMessageDialog(frame, "Email phải đúng định dạng!");
-//                                            return;
-//                                        }
-//
-//                                        int tuoiMoi = Integer.parseInt(tuoiMoiStr);
-//                                        double luongMoi = Double.parseDouble(luongMoiStr);
-//
-//                                        nv.hoTen = hoTenMoi;
-//                                        nv.tuoi = tuoiMoi;
-//                                        nv.email = emailMoi;
-//                                        nv.luongCoBan = luongMoi;
-//
-//                                        tableModel.setRowCount(0);
-//                                        for (NhanVien n : danhSachNhanVien) {
-//                                            tableModel.addRow(n.toTableRow());
-//                                        }
-//                                        JOptionPane.showMessageDialog(frame, "Cập nhật thông tin thành công!");
-//                                    } catch (NumberFormatException ex) {
-//                                        JOptionPane.showMessageDialog(frame, "Tuổi và lương phải là số hợp lệ!");
-//                                    }
-//                                }
-//                                return;
-//                            }
-//                        }
-//                        JOptionPane.showMessageDialog(frame, "Không tìm thấy nhân viên có mã " + maNV);
-//                    }
-//                });
+
+                // Cập nhật thông tin nhân viên theo mã
+                btnCapNhat.addActionListener(e -> {
+                            String maNV = JOptionPane.showInputDialog(frame, "Nhập mã nhân viên cần cập nhật:");
+                            if (maNV != null && !maNV.trim().isEmpty()) {
+                                try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003")) {
+
+                                    String sqlSelect = "SELECT * FROM NhanVien WHERE ma_nv = ?";
+                                    PreparedStatement pstmt = conn.prepareStatement(sqlSelect);
+                                    pstmt.setString(1, maNV);
+                                    ResultSet rs = pstmt.executeQuery();
+                                    if (rs.next()) {
+                                        String hoTen = rs.getString("ten");
+                                        int tuoi = rs.getInt("tuoi");
+                                        String email = rs.getString("email");
+                                        double luong = rs.getDouble("luong");
+
+                                        // Tạo form cập nhật
+                                        JPanel panel = new JPanel(new GridLayout(0, 2, 5, 5));
+                                        JTextField tfhoten = new JTextField(hoTen);
+                                        JTextField tftuoi = new JTextField(String.valueOf(tuoi));
+                                        JTextField tfemail = new JTextField(email);
+                                        JFormattedTextField tfluong = new JFormattedTextField(NumberFormat.getNumberInstance());
+                                        tfluong.setValue(luong);
+
+                                        panel.add(new JLabel("Họ Tên mới:"));
+                                        panel.add(tfhoten);
+                                        panel.add(new JLabel("Tuổi mới:"));
+                                        panel.add(tftuoi);
+                                        panel.add(new JLabel("Email mới:"));
+                                        panel.add(tfemail);
+                                        panel.add(new JLabel("Lương mới:"));
+                                        panel.add(tfluong);
+
+                                        int result = JOptionPane.showConfirmDialog(frame, panel, "Cập nhật thông tin", JOptionPane.OK_CANCEL_OPTION);
+                                        if (result == JOptionPane.OK_OPTION) {
+                                            String hoTenMoi = tfhoten.getText().trim();
+                                            String tuoiMoiStr = tftuoi.getText().trim();
+                                            String emailMoi = tfemail.getText().trim();
+                                            String luongMoiStr = tfluong.getText().trim().replace(",", "");
+
+                                            if (!hoTenMoi.matches("[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯưẠ-ỹ\\s]+")) {
+                                                JOptionPane.showMessageDialog(frame, "Họ tên chỉ được chứa chữ cái và khoảng trắng!");
+                                                return;
+                                            }
+
+                                            if (!emailMoi.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+                                                JOptionPane.showMessageDialog(frame, "Email phải đúng định dạng!");
+                                                return;
+                                            }
+
+                                            int tuoiMoi = Integer.parseInt(tuoiMoiStr);
+                                            double luongMoi = ((Number) tfluong.getValue()).doubleValue();
+
+                                            String sqlUpdate = "UPDATE nhanvien SET ten = ?, tuoi = ?, email = ?, luong = ? WHERE ma_nv = ?";
+                                            PreparedStatement psUpdate = conn.prepareStatement(sqlUpdate);
+                                            psUpdate.setString(1, hoTenMoi);
+                                            psUpdate.setInt(2, tuoiMoi);
+                                            psUpdate.setString(3, emailMoi);
+                                            psUpdate.setDouble(4, luongMoi);
+                                            psUpdate.setString(5, maNV);
+
+                                            int rows = psUpdate.executeUpdate();
+                                            if (rows > 0) {
+                                                JOptionPane.showMessageDialog(frame, "Cập nhật thành công!");
+                                                // Load lại danh sách từ DB
+                                                loadnv();
+                                            } else {
+                                                JOptionPane.showMessageDialog(frame, "Cập nhật thất bại!");
+                                            }
+                                        }
+                                    } else {
+                                        JOptionPane.showMessageDialog(frame, "Không tìm thấy nhân viên có mã " + maNV);
+                                    }
+
+                                } catch (SQLException ex) {
+                                    ex.printStackTrace();
+                                    JOptionPane.showMessageDialog(frame, "Lỗi khi truy cập cơ sở dữ liệu!");
+                                } catch (NumberFormatException ex) {
+                                    JOptionPane.showMessageDialog(frame, "Tuổi và lương phải là số hợp lệ!");
+                                }
+
+                            }
+                        });
+
+
 
                 // Tìm kiếm nhân viên theo mã
                 btnTimKiem.addActionListener(e -> {
@@ -472,68 +492,65 @@ public class MainQLNV {
                     }
                 });
 
+                // Import nhiều file (CSV: mỗi dòng có định dạng: maNV,hoTen,tuoi,email,luong)
+                btnImport.addActionListener(e -> {
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setFileFilter(new FileNameExtensionFilter("CSV Files", "csv"));
+                    fileChooser.setMultiSelectionEnabled(true);
 
-//                // Import nhiều file (CSV: mỗi dòng có định dạng: maNV,hoTen,tuoi,email,luong)
-//                btnImport.addActionListener(e -> {
-//                    JFileChooser fileChooser = new JFileChooser();
-//                    fileChooser.setFileFilter(new FileNameExtensionFilter("CSV Files", "csv"));
-//                    fileChooser.setMultiSelectionEnabled(true);
-//
-//                    int option = fileChooser.showOpenDialog(frame);
-//                    if (option == JFileChooser.APPROVE_OPTION) {
-//                        File[] files = fileChooser.getSelectedFiles();
-//                        ExecutorService executor = Executors.newFixedThreadPool(4);//chạy 4 luồng
-//
-//                        for (File file : files) {
-//                            if (!file.getName().toLowerCase().endsWith(".csv")) {
-//                                JOptionPane.showMessageDialog(frame, "Chỉ chấp nhận file CSV: " + file.getName());
-//                                continue;
-//                            }
-//
-//                            executor.submit(() -> {
-//                                List<NhanVien> importedList = importFromCSV(file);
-//                                synchronized (danhSachNhanVien) {
-//                                    danhSachNhanVien.addAll(importedList);
-//                                }
-//                                SwingUtilities.invokeLater(() -> {
-//                                    tableModel.setRowCount(0);
-//                                    for (NhanVien nv : danhSachNhanVien) {
-//                                        tableModel.addRow(nv.toTableRow());
-//                                    }
-//                                });
-//                            });
-//                        }
-//                        executor.shutdown();
-//                    }
-//                });
-//
-//
-//
-//                // Export nhiều file (xuất danh sách nhân viên ra các file)
-//                btnExport.addActionListener(e -> {
-//                    JFileChooser fileChooser = new JFileChooser();
-//                    fileChooser.setMultiSelectionEnabled(true);
-//
-//                    // Chỉ cho phép lưu file dưới dạng CSV
-//                    FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV Files (*.csv)", "csv");
-//                    fileChooser.setFileFilter(filter);
-//
-//                    int option = fileChooser.showSaveDialog(frame);
-//                    if (option == JFileChooser.APPROVE_OPTION) {
-//                        File[] files = fileChooser.getSelectedFiles();
-//                        ExecutorService executor = Executors.newFixedThreadPool(4);//chạy 4 luồng
-//
-//                        for (File file : files) {
-//                            executor.submit(() -> {
-//                                File csvFile = file.getName().toLowerCase().endsWith(".csv") ? file : new File(file.getAbsolutePath() + ".csv");
-//                                exportToCSV(csvFile, danhSachNhanVien);
-//                            });
-//                        }
-//                        executor.shutdown();
-//                    }
-//                });
-//
-//
+                    int option = fileChooser.showOpenDialog(frame);
+                    if (option == JFileChooser.APPROVE_OPTION) {
+                        File[] files = fileChooser.getSelectedFiles();
+                        ExecutorService executor = Executors.newFixedThreadPool(4);//chạy 4 luồng
+
+                        for (File file : files) {
+                            if (!file.getName().toLowerCase().endsWith(".csv")) {
+                                JOptionPane.showMessageDialog(frame, "Chỉ chấp nhận file CSV: " + file.getName());
+                                continue;
+                            }
+
+                            executor.submit(() -> {
+                                importFromCSV(file);
+                                List<NhanVien> danhSach=laydanhsachtuDB();
+                                SwingUtilities.invokeLater(() -> {
+                                    tableModel.setRowCount(0);
+                                    for (NhanVien nv : danhSach) {
+                                        tableModel.addRow(nv.toTableRow());
+                                    }
+                                });
+                            });
+                        }
+                        executor.shutdown();
+                    }
+                });
+
+
+                // Export nhiều file (xuất danh sách nhân viên ra các file)
+                btnExport.addActionListener(e -> {
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setMultiSelectionEnabled(true);
+
+                    // Chỉ cho phép lưu file dưới dạng CSV
+                    FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV Files (*.csv)", "csv");
+                    fileChooser.setFileFilter(filter);
+
+                    int option = fileChooser.showSaveDialog(frame);
+                    if (option == JFileChooser.APPROVE_OPTION) {
+                        File[] files = fileChooser.getSelectedFiles();
+                        ExecutorService executor = Executors.newFixedThreadPool(4);//chạy 4 luồng
+
+                        List<NhanVien> danhSachtuDB= laydanhsachtuDB();
+                        for (File file : files) {
+                            executor.submit(() -> {
+                                File csvFile = file.getName().toLowerCase().endsWith(".csv") ? file : new File(file.getAbsolutePath() + ".csv");
+                                exportToCSV(csvFile, danhSachtuDB);
+                            });
+                        }
+                        executor.shutdown();
+                    }
+                });
+
+
                 // Roll thưởng: chọn ngẫu nhiên số lượng nhân viên
                 btnRollThuong.addActionListener(e -> {
                     String soNguoimm = JOptionPane.showInputDialog(frame, "Nhập số người nhận thưởng:");
@@ -666,60 +683,91 @@ public class MainQLNV {
         }
 
         // Hàm import từ file, file định dạng CSV: maNV,hoTen,tuoi,email,luong
-        public static List<NhanVien> importFromCSV(File file) {
-            List<NhanVien> danhSach = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        private static void importFromCSV(File file) {
+            String url = "jdbc:mysql://localhost:3306/jdbc_test";
+            String user = "Trong";
+            String password = "31122003";
+            String sql = "INSERT INTO NhanVien(ma_nv, ten, tuoi, email, luong) " +
+                    "VALUES (?, ?, ?, ?, ?) " +
+                    "ON DUPLICATE KEY UPDATE " +
+                    "ten = VALUES(ten), tuoi = VALUES(tuoi), email = VALUES(email), luong = VALUES(luong)";
+
+            try (
+                    Connection conn = DriverManager.getConnection(url, user, password);
+                    BufferedReader reader = new BufferedReader(new FileReader(file));
+                    PreparedStatement pstmt = conn.prepareStatement(sql)
+            ) {
                 String line;
-                boolean firstLine = true;
-
                 while ((line = reader.readLine()) != null) {
-                    // Bỏ qua dòng tiêu đề
-                    if (firstLine) {
-                        firstLine = false;
-                        continue;
+                    if (line.trim().isEmpty() || line.toLowerCase().startsWith("ma_nv")) continue;
+
+                    String[] parts = line.split(",", -1);
+                    if (parts.length != 5) continue;
+
+                    try {
+                        String maNV = parts[0].trim();
+                        String hoTen = parts[1].trim();
+                        int tuoi = Integer.parseInt(parts[2].trim());
+                        String email = parts[3].trim();
+                        double luong = Double.parseDouble(parts[4].trim());
+
+                        pstmt.setString(1, maNV);
+                        pstmt.setString(2, hoTen);
+                        pstmt.setInt(3, tuoi);
+                        pstmt.setString(4, email);
+                        pstmt.setDouble(5, luong);
+                        pstmt.addBatch();
+                    } catch (NumberFormatException e) {
+                        System.err.println("Dòng bị lỗi định dạng số: " + line);
                     }
-
-                    String[] data = line.split(",");
-
-                    if (data.length != 5) {
-                        continue; // Bỏ qua dòng không hợp lệ
-                    }
-
-                    String maNV = data[0].trim();
-                    String hoTen = data[1].trim();
-                    int tuoi = Integer.parseInt(data[2].trim());
-                    String email = data[3].trim();
-                    double luong = Double.parseDouble(data[4].trim());
-
-                    danhSach.add(new NhanVien(maNV, hoTen, tuoi, email, luong));
                 }
 
-                JOptionPane.showMessageDialog(null, "Nhập dữ liệu từ " + file.getName() + " thành công!");
-            } catch (IOException | NumberFormatException ex) {
-                JOptionPane.showMessageDialog(null, "Lỗi khi nhập file CSV: " + file.getName());
+                pstmt.executeBatch();
+                JOptionPane.showMessageDialog(null, "Import dữ liệu thành công!");
+            } catch (SQLException | IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Lỗi khi import file CSV: " + file.getName());
             }
-            return danhSach;
         }
 
 
+    //Hàm danh sách từ DB
+        private static List<NhanVien> laydanhsachtuDB(){
+            List<NhanVien> danhSach=new ArrayList<>();
+            try(Connection conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003")) {
+                String sql="SELECT *FROM NhanVien";
+                Statement stmt=conn.createStatement();
+                ResultSet rs =stmt.executeQuery(sql);
+                while (rs.next()){
+                    String maNV = rs.getString("ma_nv");
+                    String ten = rs.getString("ten");
+                    int tuoi = rs.getInt("tuoi");
+                    String email = rs.getString("email");
+                    double luong = rs.getDouble("luong");
+                    danhSach.add(new NhanVien(maNV, ten, tuoi, email, luong));
+                }
+            }catch (SQLException e){
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(frame,"Lỗi khi lấy dữ liệu từ DB");
+            }
+            return danhSach;
+    }
 
         // Hàm export ra file
-        private static void exportToCSV (File file, List<NhanVien> danhSachNhanVien) {
+        private static void exportToCSV (File file, List<NhanVien> danhSach) {
+            try (PrintWriter pw=new PrintWriter(file, StandardCharsets.UTF_8)){
+                pw.println("Mã NV,Họ Tên,Tuổi,Email,Lương (VND)");
 
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                // Ghi tiêu đề
-                writer.write("Mã NV,Họ Tên,Tuổi,Email,Lương (VND)");
-                writer.newLine();
-
-                // Ghi dữ liệu nhân viên
-                for (NhanVien nv : danhSachNhanVien) {
-                    writer.write(nv.maNhanVien + "," + nv.hoTen + "," + nv.tuoi + "," + nv.email + "," + nv.luongCoBan);
-                    writer.newLine();
+                DecimalFormat df = new DecimalFormat("#.###");
+                for(NhanVien nv:danhSach){
+                    pw.printf("%s,%s,%d,%s,%s%n",nv.maNhanVien,nv.hoTen,nv.tuoi,nv.email,df.format(nv.luongCoBan));
                 }
-                JOptionPane.showMessageDialog(null, "Xuất file CSV thành công: " + file.getAbsolutePath());
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(null, "Lỗi khi ghi file CSV: " + file.getAbsolutePath());
+            }catch (IOException e){
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(frame,"Lỗi khi xuất file"+file.getName());
             }
+
+
         }
 
 
@@ -731,8 +779,9 @@ public class MainQLNV {
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
                 // Ghi dòng tiêu đề CSV
-                writer.write("MaNV,HoTen,Tuoi,Email,Luong");
+                writer.write("Mã NV,Họ Tên,Tuổi,Email,Lương (VND)");
                 writer.newLine();
+                DecimalFormat df = new DecimalFormat("#.###");
 
                 for (int i = 0; i < soLuong; i++) {
                     String maNV= String.format("%03d",i);
@@ -740,7 +789,7 @@ public class MainQLNV {
                     int tuoi = random.nextInt(50) + 18;
                     String email = "user" + maNV + "@gmail.com";
                     double luong = (random.nextInt(30) + 5) * 1000000; // Lương từ 5-35 triệu
-                    String line = maNV + "," + hoTen + "," + tuoi + "," + email + "," + luong;
+                    String line = maNV + "," + hoTen + "," + tuoi + "," + email + "," + df.format(luong);
 
                     writer.write(line);
                     writer.newLine();
