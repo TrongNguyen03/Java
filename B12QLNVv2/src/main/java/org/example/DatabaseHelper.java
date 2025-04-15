@@ -159,7 +159,7 @@ public class DatabaseHelper {
         String sql = "SELECT * FROM NhanVien";
         File file = new File("DanhSachNhanVien.csv");
 
-        try (Connection conn = getConnection();
+        try (
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql);
              BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
