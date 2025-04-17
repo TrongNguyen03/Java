@@ -483,9 +483,9 @@ public class MainQLNVv2 {
         });
     }
 
-    // Hàm cập nhật bảng hiển thị (sử dụng DatabaseHelper)
+    // Hàm cập nhật bảng hiển thị ]
     public static void updateTable() {
-        List<NhanVien> danhSach = laydanhsachtuDB();
+        List<NhanVien> danhSach = DatabaseHelper.loadEmployees();
         tableModel.setRowCount(0);
         for (NhanVien nv : danhSach) {
             tableModel.addRow(nv.toTableRow());

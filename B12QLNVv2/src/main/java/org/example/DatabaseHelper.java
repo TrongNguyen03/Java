@@ -9,17 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper {
-    private static final String URL = "jdbc:mysql://localhost:3306/jdbc_test";
-    private static final String USER = "Trong";
-    private static final String PASS = "31122003";
+
     private static Connection conn;
 
     // Khởi tạo kết nối một lần
     static {
         try {
-            conn = DriverManager.getConnection(URL, USER, PASS);
-            System.out.println("Kết nối DB thành công.");
-        } catch (SQLException e) {
+            conn = ConnectionPool.getDataSource().getConnection();
+        } catch (
+                SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Không thể kết nối đến DB: " + e.getMessage());
             System.exit(1);
@@ -30,11 +28,13 @@ public class DatabaseHelper {
         return conn;
     }
 
+
     // Load danh sách nhân viên từ DB
     public static List<MainQLNVv2.NhanVien> loadEmployees() {
         List<MainQLNVv2.NhanVien> list = new ArrayList<>();
+        ConnectionPool.printPoolStats();
         String sql = "SELECT * FROM NhanVien";
-        try (Statement stmt = conn.createStatement();
+        try (Statement stmt = getConnection().createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()){
                 String maNV = rs.getString("ma_nv");
@@ -54,7 +54,7 @@ public class DatabaseHelper {
     // Kiểm tra trùng nhân viên theo mã
     public static boolean employeeExists(String maNV) throws SQLException {
         String sql = "SELECT COUNT(*) FROM NhanVien WHERE ma_nv = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
             pstmt.setString(1, maNV);
             ResultSet rs = pstmt.executeQuery();
             if(rs.next()){
@@ -66,8 +66,9 @@ public class DatabaseHelper {
 
     // Thêm nhân viên
     public static void insertEmployee(String maNV, String ten, int tuoi, String email, double luong) throws SQLException {
+        ConnectionPool.printPoolStats();
         String sql = "INSERT INTO NhanVien (ma_nv, ten, tuoi, email, luong) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
             pstmt.setString(1, maNV);
             pstmt.setString(2, ten);
             pstmt.setInt(3, tuoi);
@@ -79,8 +80,9 @@ public class DatabaseHelper {
 
     // Cập nhật nhân viên
     public static boolean updateEmployee(String maNV, String ten, int tuoi, String email, double luong) throws SQLException {
+        ConnectionPool.printPoolStats();
         String sql = "UPDATE NhanVien SET ten = ?, tuoi = ?, email = ?, luong = ? WHERE ma_nv = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
             pstmt.setString(1, ten);
             pstmt.setInt(2, tuoi);
             pstmt.setString(3, email);
@@ -93,8 +95,9 @@ public class DatabaseHelper {
 
     // Xóa nhân viên
     public static void deleteEmployee(String maNV) throws SQLException {
+
         String sql = "DELETE FROM NhanVien WHERE ma_nv = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
             pstmt.setString(1, maNV);
             pstmt.executeUpdate();
         }
@@ -102,8 +105,9 @@ public class DatabaseHelper {
 
     // Tìm kiếm nhân viên theo mã
     public static MainQLNVv2.NhanVien findEmployeeById(String maNV) throws SQLException {
+
         String sql = "SELECT * FROM NhanVien WHERE ma_nv = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
             pstmt.setString(1, maNV);
             ResultSet rs = pstmt.executeQuery();
             if(rs.next()){
@@ -119,11 +123,12 @@ public class DatabaseHelper {
 
     // Import từ CSV
     public static void importFromCSV(String filePath) {
+
         String sql = "INSERT INTO NhanVien(ma_nv, ten, tuoi, email, luong) " +
                 "VALUES (?, ?, ?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE ten = VALUES(ten), tuoi = VALUES(tuoi), email = VALUES(email), luong = VALUES(luong)";
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath));
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if(line.trim().isEmpty() || line.toLowerCase().startsWith("ma_nv"))
@@ -160,7 +165,7 @@ public class DatabaseHelper {
         File file = new File("DanhSachNhanVien.csv");
 
         try (
-             Statement stmt = conn.createStatement();
+             Statement stmt = getConnection().createStatement();
              ResultSet rs = stmt.executeQuery(sql);
              BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
 
