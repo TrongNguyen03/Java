@@ -10,29 +10,13 @@ import java.util.List;
 
 public class DatabaseHelper {
 
-    private static Connection conn;
-
-    // Khởi tạo kết nối một lần
-    static {
-        try {
-            conn = ConnectionPool.getDataSource().getConnection();
-        } catch (
-                SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Không thể kết nối đến DB: " + e.getMessage());
-            System.exit(1);
-        }
+    public static Connection getConnection() throws SQLException {
+        return ConnectionPool.getDataSource().getConnection();
     }
-
-    public static Connection getConnection() {
-        return conn;
-    }
-
 
     // Load danh sách nhân viên từ DB
     public static List<MainQLNVv2.NhanVien> loadEmployees() {
         List<MainQLNVv2.NhanVien> list = new ArrayList<>();
-        ConnectionPool.printPoolStats();
         String sql = "SELECT * FROM NhanVien";
         try (Statement stmt = getConnection().createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -66,9 +50,10 @@ public class DatabaseHelper {
 
     // Thêm nhân viên
     public static void insertEmployee(String maNV, String ten, int tuoi, String email, double luong) throws SQLException {
-        ConnectionPool.printPoolStats();
+
         String sql = "INSERT INTO NhanVien (ma_nv, ten, tuoi, email, luong) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
+            System.out.println("Thread: "+ Thread.currentThread().getName()+ " dùng connection:"+getConnection().hashCode());
             pstmt.setString(1, maNV);
             pstmt.setString(2, ten);
             pstmt.setInt(3, tuoi);
@@ -80,9 +65,10 @@ public class DatabaseHelper {
 
     // Cập nhật nhân viên
     public static boolean updateEmployee(String maNV, String ten, int tuoi, String email, double luong) throws SQLException {
-        ConnectionPool.printPoolStats();
+
         String sql = "UPDATE NhanVien SET ten = ?, tuoi = ?, email = ?, luong = ? WHERE ma_nv = ?";
         try (PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
+            System.out.println("Thread: "+ Thread.currentThread().getName()+ " dùng connection:"+getConnection().hashCode());
             pstmt.setString(1, ten);
             pstmt.setInt(2, tuoi);
             pstmt.setString(3, email);
@@ -98,6 +84,7 @@ public class DatabaseHelper {
 
         String sql = "DELETE FROM NhanVien WHERE ma_nv = ?";
         try (PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
+            System.out.println("Thread: "+ Thread.currentThread().getName()+ " dùng connection:"+getConnection().hashCode());
             pstmt.setString(1, maNV);
             pstmt.executeUpdate();
         }
@@ -108,6 +95,7 @@ public class DatabaseHelper {
 
         String sql = "SELECT * FROM NhanVien WHERE ma_nv = ?";
         try (PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
+            System.out.println("Thread: "+ Thread.currentThread().getName()+ " dùng connection:"+getConnection().hashCode());
             pstmt.setString(1, maNV);
             ResultSet rs = pstmt.executeQuery();
             if(rs.next()){
@@ -128,7 +116,9 @@ public class DatabaseHelper {
                 "VALUES (?, ?, ?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE ten = VALUES(ten), tuoi = VALUES(tuoi), email = VALUES(email), luong = VALUES(luong)";
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath));
-             PreparedStatement pstmt = getConnection().prepareStatement(sql)) {
+             Connection conn= getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             String line;
             while ((line = reader.readLine()) != null) {
                 if(line.trim().isEmpty() || line.toLowerCase().startsWith("ma_nv"))

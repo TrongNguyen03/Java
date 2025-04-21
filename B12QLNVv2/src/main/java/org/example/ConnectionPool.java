@@ -14,7 +14,7 @@ public class ConnectionPool {
         config.setUsername("Trong");
         config.setPassword("31122003");
 
-        config.setMaximumPoolSize(10);
+        config.setMaximumPoolSize(50);
         config.setMinimumIdle(2);
         config.setIdleTimeout(30000);
         config.setConnectionTimeout(30000);
@@ -24,16 +24,5 @@ public class ConnectionPool {
     }
     public static DataSource getDataSource(){
         return dataSource;
-    }
-
-
-    public static void printPoolStats() {
-        HikariDataSource ds = (HikariDataSource) ConnectionPool.getDataSource();
-        HikariPoolMXBean poolMXBean = ds.getHikariPoolMXBean();
-
-        System.out.println("Active connections: " + poolMXBean.getActiveConnections());
-        System.out.println("Idle connections: " + poolMXBean.getIdleConnections());
-        System.out.println("Total connections: " + poolMXBean.getTotalConnections());
-        System.out.println("Threads awaiting: " + poolMXBean.getThreadsAwaitingConnection());
     }
 }
