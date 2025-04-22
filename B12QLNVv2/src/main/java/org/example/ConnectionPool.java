@@ -14,7 +14,7 @@ public class ConnectionPool {
         config.setUsername("Trong");
         config.setPassword("31122003");
 
-        config.setMaximumPoolSize(50);
+        config.setMaximumPoolSize(10);
         config.setMinimumIdle(2);
         config.setIdleTimeout(30000);
         config.setConnectionTimeout(30000);
@@ -24,5 +24,13 @@ public class ConnectionPool {
     }
     public static DataSource getDataSource(){
         return dataSource;
+    }
+    public  static void printALLConnection(){
+        HikariPoolMXBean poolMXBean = dataSource.getHikariPoolMXBean();
+        System.out.println(">>> HikariCP Pool Status:");
+        System.out.println("  Tổng số connection: " + poolMXBean.getTotalConnections());
+        System.out.println("  Số connection đang sử dụng: " + poolMXBean.getActiveConnections());
+        System.out.println("  Số connection đang idle (rảnh): " + poolMXBean.getIdleConnections());
+        System.out.println("  Số connection đang chờ: " + poolMXBean.getThreadsAwaitingConnection());
     }
 }
