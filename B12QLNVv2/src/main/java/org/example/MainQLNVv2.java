@@ -52,9 +52,7 @@ public class MainQLNVv2 {
             return email;
         }
 
-        public double getLuong() {
-            return luongCoBan;
-        }
+
 
         @Override
         public String toString() {
@@ -297,7 +295,7 @@ public class MainQLNVv2 {
                             JTextField tftuoi = new JTextField(String.valueOf(nv.getTuoi()));
                             JTextField tfemail = new JTextField(nv.getEmail());
                             JFormattedTextField tfluong = new JFormattedTextField(NumberFormat.getNumberInstance());
-                            tfluong.setValue(nv.getLuong());
+                            tfluong.setValue(nv.getThuNhap());
                             panel.add(new JLabel("Họ Tên mới:"));
                             panel.add(tfhoten);
                             panel.add(new JLabel("Tuổi mới:"));
@@ -353,7 +351,7 @@ public class MainQLNVv2 {
                                     "\nHọ Tên: " + nv.getTen() +
                                     "\nTuổi: " + nv.getTuoi() +
                                     "\nEmail: " + nv.getEmail() +
-                                    "\nLương: " + df.format(nv.getLuong());
+                                    "\nLương: " + df.format(nv.getThuNhap());
                             JOptionPane.showMessageDialog(frame, info);
                         } else {
                             JOptionPane.showMessageDialog(frame, "Không tìm thấy nhân viên có mã " + maNV);

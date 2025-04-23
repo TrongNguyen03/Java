@@ -7,7 +7,7 @@ import com.zaxxer.hikari.HikariPoolMXBean;
 import javax.sql.DataSource;
 
 public class ConnectionPool {
-    private static HikariDataSource dataSource;
+    private static final HikariDataSource dataSource;
     static {
         HikariConfig config=new HikariConfig();
         config.setJdbcUrl("jdbc:mysql://localhost:3306/jdbc_test");
