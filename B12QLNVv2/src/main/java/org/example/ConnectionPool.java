@@ -30,7 +30,7 @@ public class ConnectionPool {
         System.out.println(">>> HikariCP Pool Status:");
         System.out.println("  Tổng số connection: " + poolMXBean.getTotalConnections());
         System.out.println("  Số connection đang sử dụng: " + poolMXBean.getActiveConnections());
-        System.out.println("  Số connection đang idle (rảnh): " + poolMXBean.getIdleConnections());
+        System.out.println("  Số connection đang rảnh: " + poolMXBean.getIdleConnections());
         System.out.println("  Số connection đang chờ: " + poolMXBean.getThreadsAwaitingConnection());
     }
 }
