@@ -214,10 +214,9 @@ public class DatabaseHelper {
     // Lấy danh sách đơn hôm nay
     public List<Order> getTodayOrders() {
         List<Order> orders = new ArrayList<>();
-        // Sửa đổi truy vấn SQL để JOIN với bảng PAYMENTS
         String sql = "SELECT o.order_id, o.order_datetime, o.total_amount, o.status, p.payment_method " +
                 "FROM ORDERS o LEFT JOIN PAYMENTS p ON o.order_id = p.order_id " +
-                "WHERE DATE(o.order_datetime) = CURRENT_DATE"; // Sử dụng alias 'o'
+                "WHERE DATE(o.order_datetime) = CURRENT_DATE";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -247,6 +246,71 @@ public class DatabaseHelper {
         }
         return orders;
     }
+
+    //Lấy theo tháng
+    public List<Order> getMonthOrders() {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT o.order_id, o.order_datetime, o.total_amount, o.status, p.payment_method " +
+                "FROM ORDERS o LEFT JOIN PAYMENTS p ON o.order_id = p.order_id " +
+                "WHERE MONTH(o.order_datetime) = MONTH(CURRENT_DATE) " +
+                "AND YEAR(o.order_datetime) = YEAR(CURRENT_DATE)";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("order_id");
+                Timestamp datetime = rs.getTimestamp("order_datetime");
+                BigDecimal total = rs.getBigDecimal("total_amount");
+                String status = rs.getString("status");
+                String paymentMethod = rs.getString("payment_method");
+
+
+                orders.add(new Order(id, datetime, total, status, paymentMethod));
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Lỗi khi lấy danh sách đơn tháng: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            closeResources(conn, pstmt, rs);
+        }
+        return orders;
+    }
+
+    //Lấy theo năm
+    public List<Order> getYearOrders() {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT o.order_id, o.order_datetime, o.total_amount, o.status, p.payment_method " +
+                "FROM ORDERS o LEFT JOIN PAYMENTS p ON o.order_id = p.order_id " +
+                "WHERE YEAR(o.order_datetime) = YEAR(CURRENT_DATE)";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("order_id");
+                Timestamp datetime = rs.getTimestamp("order_datetime");
+                BigDecimal total = rs.getBigDecimal("total_amount");
+                String status = rs.getString("status");
+                String paymentMethod = rs.getString("payment_method");
+
+                orders.add(new Order(id, datetime, total, status, paymentMethod));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Lỗi khi lấy đơn theo năm: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
+        }
+        return orders;
+    }
+
 
     //Phương thức Tài Khoản
     public boolean checkLogin(String username,String password){

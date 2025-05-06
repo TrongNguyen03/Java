@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 
 class Product {
     private int productId;
@@ -862,9 +863,55 @@ public class ThuNganCafe extends JFrame { // Đổi tên lớp
 
     // Hàm hóa đơn ngày
     private void showTodayOrders() {
-        List<Order> orders = dbHelper.getTodayOrders();
+        JPanel panel = new JPanel(new BorderLayout());
 
-        // Thêm cột "Hình thức thanh toán"
+        // Panel trên chứa các nút
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnToday = new JButton("Xem đơn hôm nay");
+        JButton btnMonth = new JButton("Xem đơn theo tháng");
+        JButton btnYear = new JButton("Xem đơn theo năm");
+
+        topPanel.add(btnToday);
+        topPanel.add(btnMonth);
+        topPanel.add(btnYear);
+        panel.add(topPanel, BorderLayout.NORTH);
+
+        // Hàm cập nhật bảng theo loại
+        Consumer<String> updateTableByType = (type) -> {
+            List<Order> orders;
+            String prefix;
+            switch (type) {
+                case "month":
+                    orders = dbHelper.getMonthOrders();
+                    prefix = "Tổng doanh thu tháng này: ";
+                    break;
+                case "year":
+                    orders = dbHelper.getYearOrders();
+                    prefix = "Tổng doanh thu năm nay: ";
+                    break;
+                default:
+                    orders = dbHelper.getTodayOrders();
+                    prefix = "Tổng doanh thu hôm nay: ";
+            }
+            updateOrderTable(panel, orders, prefix);
+        };
+
+        updateTableByType.accept("today");
+
+        btnToday.addActionListener(e -> updateTableByType.accept("today"));
+        btnMonth.addActionListener(e -> updateTableByType.accept("month"));
+        btnYear.addActionListener(e -> updateTableByType.accept("year"));
+
+        JDialog dialog = new JDialog(this, "Chi tiết đơn hàng", true);
+        dialog.getContentPane().add(panel);
+        dialog.setSize(800, 450);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
+
+    // Hàm phụ để cập nhật bảng và tổng doanh thu
+    private void updateOrderTable(JPanel parentPanel, List<Order> orders, String revenueLabelPrefix) {
         String[] columns = {"Mã đơn", "Thời gian", "Tổng tiền (VND)", "Trạng thái", "Hình thức thanh toán"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override
@@ -875,7 +922,6 @@ public class ThuNganCafe extends JFrame { // Đổi tên lớp
 
         DecimalFormat currencyFormat = new DecimalFormat("#,###");
         SimpleDateFormat datetimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-
         BigDecimal totalRevenue = BigDecimal.ZERO;
 
         for (Order order : orders) {
@@ -895,20 +941,25 @@ public class ThuNganCafe extends JFrame { // Đổi tên lớp
         JTable table = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
 
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(scrollPane, BorderLayout.CENTER);
+        // Xóa các thành phần cũ ở CENTER và SOUTH
+        parentPanel.remove(scrollPane);
+        for (Component comp : parentPanel.getComponents()) {
+            if (comp instanceof JScrollPane || comp instanceof JLabel) {
+                parentPanel.remove(comp);
+            }
+        }
 
-        JLabel totalRevenueLabel = new JLabel("Tổng doanh thu hôm nay: " + currencyFormat.format(totalRevenue) + " VND");
+        parentPanel.add(scrollPane, BorderLayout.CENTER);
+
+        JLabel totalRevenueLabel = new JLabel(revenueLabelPrefix + currencyFormat.format(totalRevenue) + " VND");
         totalRevenueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         totalRevenueLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        panel.add(totalRevenueLabel, BorderLayout.SOUTH);
+        parentPanel.add(totalRevenueLabel, BorderLayout.SOUTH);
 
-        JDialog dialog = new JDialog(this, "Chi tiết đơn hàng hôm nay", true);
-        dialog.getContentPane().add(panel);
-        dialog.setSize(700, 400); // Có thể tăng kích thước dialog để chứa cột mới
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
+        parentPanel.revalidate();
+        parentPanel.repaint();
     }
+
 
 
     // Hàm reset đơn hàng hiện tại
