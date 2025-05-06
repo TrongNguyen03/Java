@@ -863,6 +863,7 @@ public class ThuNganCafe extends JFrame { // Đổi tên lớp
 
     // Hàm hóa đơn ngày
     private void showTodayOrders() {
+
         JPanel panel = new JPanel(new BorderLayout());
 
         // Panel trên chứa các nút

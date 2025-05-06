@@ -14,18 +14,6 @@ public class DatabaseHelper {
         return ConnectionPool.getDataSource().getConnection();
     }
 
-    // Phương thức đóng kết nối và các tài nguyên liên quan
-    public static void closeResources(Connection conn, Statement stmt, ResultSet rs) {
-        try { if (rs != null) rs.close(); } catch (SQLException e) { e.printStackTrace(); }
-        try { if (stmt != null) stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     // Phương thức đóng kết nối và PreparedStatement
     public static void closeResources(Connection conn, PreparedStatement pstmt, ResultSet rs) {
@@ -45,15 +33,11 @@ public class DatabaseHelper {
     public List<Product> getAllProducts() {
         List<Product> products = new ArrayList<>();
         String sql = "SELECT product_id, name, description, price, image_path, is_available FROM PRODUCTS WHERE is_available = TRUE";
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
 
-        try {
-            conn = getConnection();
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql);
 
+        try (Connection conn =getConnection();
+            Statement stmt=conn.createStatement();
+            ResultSet rs=stmt.executeQuery(sql)){
             while (rs.next()) {
                 int id = rs.getInt("product_id");
                 String name = rs.getString("name");
@@ -66,8 +50,6 @@ public class DatabaseHelper {
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Lỗi khi tải danh sách sản phẩm: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            closeResources(conn, stmt, rs);
         }
         return products;
     }
@@ -75,28 +57,25 @@ public class DatabaseHelper {
     // Tìm sản phẩm theo ID
     public Product findProductById(int productId) {
         String sql = "SELECT product_id, name, description, price, image_path, is_available FROM PRODUCTS WHERE product_id = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, productId);
-            rs = pstmt.executeQuery();
-            if (rs.next()) {
-                int id = rs.getInt("product_id");
-                String name = rs.getString("name");
-                String description = rs.getString("description");
-                BigDecimal price = rs.getBigDecimal("price");
-                String imagePath = rs.getString("image_path");
-                boolean isAvailable = rs.getBoolean("is_available");
-                return new Product(id, name, description, price, imagePath, isAvailable);
+
+        try (Connection conn=getConnection();
+            PreparedStatement pstmt=conn.prepareStatement(sql)){
+
+            pstmt.setInt(1,productId);
+            try(ResultSet rs=pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int id = rs.getInt("product_id");
+                    String name = rs.getString("name");
+                    String description = rs.getString("description");
+                    BigDecimal price = rs.getBigDecimal("price");
+                    String imagePath = rs.getString("image_path");
+                    boolean isAvailable = rs.getBoolean("is_available");
+                    return new Product(id, name, description, price, imagePath, isAvailable);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Lỗi khi tìm sản phẩm: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            closeResources(conn, pstmt, rs);
         }
         return null; // Không tìm thấy sản phẩm
     }
@@ -106,34 +85,28 @@ public class DatabaseHelper {
         List<Product> products = new ArrayList<>();
         // Tìm kiếm trong cả tên và mô tả, không phân biệt chữ hoa chữ thường
         String sql = "SELECT product_id, name, description, price, image_path, is_available FROM PRODUCTS WHERE (LOWER(name) LIKE ? OR LOWER(description) LIKE ?) AND is_available = TRUE";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
 
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
+        try(Connection conn=getConnection();
+            PreparedStatement pstmt=conn.prepareStatement(sql)) {
             // Thêm '%' vào chuỗi tìm kiếm các chuỗi con
             String likeTerm = "%" + searchTerm.toLowerCase() + "%";
             pstmt.setString(1, likeTerm);
             pstmt.setString(2, likeTerm);
 
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                int id = rs.getInt("product_id");
-                String name = rs.getString("name");
-                String description = rs.getString("description");
-                BigDecimal price = rs.getBigDecimal("price");
-                String imagePath = rs.getString("image_path");
-                boolean isAvailable = rs.getBoolean("is_available");
-                products.add(new Product(id, name, description, price, imagePath, isAvailable));
+            try(ResultSet rs=pstmt.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("product_id");
+                    String name = rs.getString("name");
+                    String description = rs.getString("description");
+                    BigDecimal price = rs.getBigDecimal("price");
+                    String imagePath = rs.getString("image_path");
+                    boolean isAvailable = rs.getBoolean("is_available");
+                    products.add(new Product(id, name, description, price, imagePath, isAvailable));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Lỗi khi tìm kiếm sản phẩm: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            closeResources(conn, pstmt, rs);
         }
         return products;
     }
@@ -141,23 +114,21 @@ public class DatabaseHelper {
     // Thêm sản phẩm mới
     public boolean insertProduct(Product product) {
         String sql = "INSERT INTO PRODUCTS (name, description, price, image_path, is_available) VALUES (?, ?, ?, ?, ?)";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
+
+        try (Connection conn=getConnection();
+             PreparedStatement pstmt=conn.prepareStatement(sql)){
+
             pstmt.setString(1, product.getName());
             pstmt.setString(2, product.getDescription());
             pstmt.setBigDecimal(3, product.getPrice());
             pstmt.setString(4, product.getImagePath());
             pstmt.setBoolean(5, product.isAvailable());
+
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Lỗi khi thêm sản phẩm: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            closeResources(conn, pstmt, null);
         }
         return false;
     }
@@ -165,24 +136,22 @@ public class DatabaseHelper {
     // Cập nhật thông tin sản phẩm
     public boolean updateProduct(Product product) {
         String sql = "UPDATE PRODUCTS SET name = ?, description = ?, price = ?, image_path = ?, is_available = ? WHERE product_id = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
+
+        try(Connection conn=getConnection();
+            PreparedStatement pstmt=conn.prepareStatement(sql)) {
+
             pstmt.setString(1, product.getName());
             pstmt.setString(2, product.getDescription());
             pstmt.setBigDecimal(3, product.getPrice());
             pstmt.setString(4, product.getImagePath());
             pstmt.setBoolean(5, product.isAvailable());
             pstmt.setInt(6, product.getProductId());
+
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Lỗi khi cập nhật sản phẩm: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            closeResources(conn, pstmt, null);
         }
         return false;
     }
@@ -191,11 +160,10 @@ public class DatabaseHelper {
     // Cập nhật trạng thái is_available thành FALSE (Ngừng kinh doanh)
     public boolean deactivateProduct(int productId) {
         String sql = "UPDATE PRODUCTS SET is_available = FALSE WHERE product_id = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
+
+        try(Connection conn=getConnection();
+            PreparedStatement pstmt=conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, productId);
 
             int rowsAffected = pstmt.executeUpdate();
@@ -204,8 +172,6 @@ public class DatabaseHelper {
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Lỗi khi cập nhật trạng thái sản phẩm: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            closeResources(conn, pstmt, null);
         }
         return false;
     }
@@ -218,14 +184,9 @@ public class DatabaseHelper {
                 "FROM ORDERS o LEFT JOIN PAYMENTS p ON o.order_id = p.order_id " +
                 "WHERE DATE(o.order_datetime) = CURRENT_DATE";
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
+        try(Connection conn=getConnection();
+            PreparedStatement pstmt=conn.prepareStatement(sql);
+            ResultSet rs=pstmt.executeQuery()) {
 
             while (rs.next()) {
                 int id = rs.getInt("order_id");
@@ -241,8 +202,6 @@ public class DatabaseHelper {
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Lỗi khi lấy danh sách đơn hôm nay: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            closeResources(conn, pstmt, rs);
         }
         return orders;
     }
@@ -255,14 +214,10 @@ public class DatabaseHelper {
                 "WHERE MONTH(o.order_datetime) = MONTH(CURRENT_DATE) " +
                 "AND YEAR(o.order_datetime) = YEAR(CURRENT_DATE)";
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+        try(Connection conn=getConnection();
+            PreparedStatement pstmt=conn.prepareStatement(sql);
+            ResultSet rs=pstmt.executeQuery()) {
 
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
 
             while (rs.next()) {
                 int id = rs.getInt("order_id");
@@ -278,8 +233,6 @@ public class DatabaseHelper {
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Lỗi khi lấy danh sách đơn tháng: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            closeResources(conn, pstmt, rs);
         }
         return orders;
     }
@@ -315,22 +268,19 @@ public class DatabaseHelper {
     //Phương thức Tài Khoản
     public boolean checkLogin(String username,String password){
         String sql = "SELECT * FROM USERS WHERE BINARY username = ? AND password = ?";
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try{
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
+
+        try(Connection conn=getConnection();
+            PreparedStatement pstmt=conn.prepareStatement(sql)){
+
             pstmt.setString(1,username);
             pstmt.setString(2,password);
-            rs=pstmt.executeQuery();
-            return rs.next();
+            try(ResultSet rs=pstmt.executeQuery()) {
+                return rs.next();
+            }
         }catch (SQLException e){
             e.printStackTrace();
             JOptionPane.showMessageDialog(null,"Lỗi kiểu kiểm tra đăng nhập: "+e.getMessage(),"lỗi DB",JOptionPane.ERROR_MESSAGE);
 
-        }finally {
-            closeResources(conn,pstmt,rs);
         }
         return false;
     }
