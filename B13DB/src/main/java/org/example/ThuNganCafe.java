@@ -65,6 +65,7 @@ class Product {
     }
 
     //Ô sản phẩm
+    //Ô sản phẩm
     public JButton toDisplayComponent(ActionListener clickAction) {
         JButton button = new JButton();
         // Sử dụng BorderLayout cho nút chính để chia thành 2 vùng: Ảnh (WEST) và Text (CENTER)
@@ -122,6 +123,11 @@ class Product {
         JLabel nameLabel = new JLabel("<html><b>" + this.name + "</b></html>");
         nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
+        // Thêm JLabel cho mô tả sản phẩm
+        JLabel descriptionLabel = new JLabel(this.description);
+        descriptionLabel.setFont(new Font("Arial", Font.PLAIN, 13));
+
+
         // Định dạng giá tiền có dấu phân cách hàng nghìn
         DecimalFormat currencyFormat = new DecimalFormat("#,###");
         JLabel priceLabel = new JLabel(currencyFormat.format(this.price) + " VND");
@@ -130,12 +136,15 @@ class Product {
         // Căn lề trái cho các nhãn trong textPanel
         idLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        descriptionLabel.setAlignmentX(Component.LEFT_ALIGNMENT); // Căn lề trái cho mô tả
         priceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Thêm các nhãn vào textPanel
         textPanel.add(idLabel);
         textPanel.add(Box.createRigidArea(new Dimension(0, 2))); // Thêm khoảng cách dọc 2px
         textPanel.add(nameLabel);
+        textPanel.add(Box.createRigidArea(new Dimension(0, 2))); // Thêm khoảng cách
+        textPanel.add(descriptionLabel); // Thêm mô tả vào panel
         textPanel.add(Box.createRigidArea(new Dimension(0, 2))); // Thêm khoảng cách
         textPanel.add(priceLabel);
 
@@ -276,7 +285,7 @@ class Payment {
 //Lớp chính của ứng dụng GUI
 public class ThuNganCafe extends JFrame { // Đổi tên lớp
 
-    private JTextField tfProductId, tfProductName, tfPrice, tfImagePath, tfDescription; // Trường nhập liệu sản phẩm
+    private JTextField tfProductName, tfPrice, tfImagePath, tfDescription; // Trường nhập liệu sản phẩm
     private JPanel productDisplayPanel; // Panel hiển thị các sản phẩm có sẵn
     private DefaultTableModel orderTableModel; // Model cho bảng chi tiết đơn hàng
     private JTable orderTable; // Bảng chi tiết đơn hàng
@@ -333,40 +342,33 @@ public class ThuNganCafe extends JFrame { // Đổi tên lớp
         int startY = 40; // Bắt đầu dưới tiêu đề
         int labelWidth = 120, fieldWidth = 200, height = 25, gapY = 30; // Điều chỉnh kích thước và khoảng cách
 
-        JLabel lblProductId = new JLabel("Product ID:");
-        lblProductId.setBounds(20, startY, labelWidth, height);
-        productManagementPanel.add(lblProductId);
-        tfProductId = new JTextField();
-        tfProductId.setBounds(150, startY, fieldWidth, height);
-        tfProductId.setEditable(false);
-        productManagementPanel.add(tfProductId);
 
         JLabel lblProductName = new JLabel("Tên sản phẩm:");
-        lblProductName.setBounds(20, startY + gapY, labelWidth, height);
+        lblProductName.setBounds(20, startY, labelWidth, height);
         productManagementPanel.add(lblProductName);
         tfProductName = new JTextField();
-        tfProductName.setBounds(150, startY + gapY, fieldWidth, height);
+        tfProductName.setBounds(150, startY, fieldWidth, height);
         productManagementPanel.add(tfProductName);
 
         JLabel lblPrice = new JLabel("Giá (VND):");
-        lblPrice.setBounds(20, startY + 2 * gapY, labelWidth, height);
+        lblPrice.setBounds(20, startY + gapY, labelWidth, height);
         productManagementPanel.add(lblPrice);
         tfPrice = new JTextField();
-        tfPrice.setBounds(150, startY + 2 * gapY, fieldWidth, height);
+        tfPrice.setBounds(150, startY + gapY, fieldWidth, height);
         productManagementPanel.add(tfPrice);
 
         JLabel lblImagePath = new JLabel("Đường dẫn ảnh:");
-        lblImagePath.setBounds(20, startY + 3 * gapY, labelWidth, height);
+        lblImagePath.setBounds(20, startY + 2 * gapY, labelWidth, height);
         productManagementPanel.add(lblImagePath);
         tfImagePath = new JTextField();
-        tfImagePath.setBounds(150, startY + 3 * gapY, fieldWidth, height);
+        tfImagePath.setBounds(150, startY + 2 * gapY, fieldWidth, height);
         productManagementPanel.add(tfImagePath);
 
         JLabel lblDescription = new JLabel("Mô tả:");
-        lblDescription.setBounds(20, startY + 4 * gapY, labelWidth, height);
+        lblDescription.setBounds(20, startY + 3 * gapY, labelWidth, height);
         productManagementPanel.add(lblDescription);
         tfDescription = new JTextField(); // Có thể dùng JTextArea trong JScrollPane cho mô tả dài
-        tfDescription.setBounds(150, startY + 4 * gapY, fieldWidth, height);
+        tfDescription.setBounds(150, startY + 3 * gapY, fieldWidth, height);
         productManagementPanel.add(tfDescription);
 
         JLabel lblSearch = new JLabel("Tìm kiếm:");
@@ -853,12 +855,10 @@ public class ThuNganCafe extends JFrame { // Đổi tên lớp
 
     // Hàm xóa nội dung form nhập liệu sản phẩm
     private void clearProductFields() {
-        tfProductId.setText("");
         tfProductName.setText("");
         tfPrice.setText("");
         tfImagePath.setText("");
         tfDescription.setText("");
-        tfProductId.setEditable(false); // Đảm bảo ID vẫn không cho sửa
     }
 
     // Hàm hóa đơn ngày
