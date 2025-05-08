@@ -1,6 +1,7 @@
 package com.example.PosCafe.service;
 
 import com.example.PosCafe.model.Order;
+import com.example.PosCafe.model.OrderItem;
 import com.example.PosCafe.model.Payment;
 import com.example.PosCafe.repository.OrderRepository;
 import com.example.PosCafe.repository.PaymentRepository;
@@ -26,6 +27,33 @@ public class OrderService {
     public void savePayment(Payment p) {
         payRepo.save(p);
     }
+
+    public boolean saveOrderAndPayment(Order order, List<OrderItem> items, Payment payment) {
+        try {
+            // Gán đơn hàng cho từng item
+            for (OrderItem item : items) {
+                item.setOrder(order);
+            }
+
+            // Gán danh sách item vào đơn hàng
+            order.setItems(items);
+
+            // Lưu đơn hàng (sẽ lưu luôn các OrderItem nếu cascade đúng)
+            Order savedOrder = orderRepo.save(order);
+
+            // Gán lại đơn hàng đã có ID cho payment
+            payment.setOrder(savedOrder);
+
+            // Lưu thanh toán
+            payRepo.save(payment);
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
     public List<Order> getToday() {
         LocalDate d = LocalDate.now();

@@ -23,4 +23,26 @@ public class ProductService {
         return repo.findById(id).orElse(null);
     }
 
+    public Product save(Product p) {
+        return repo.save(p);
+    }
+
+    public boolean update(Product updated) {
+        if (repo.existsById(updated.getProductId())) {
+            repo.save(updated);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean deactivate(int id) {
+        Product p = getById(id);
+        if (p != null) {
+            p.setAvailable(false);
+            repo.save(p);
+            return true;
+        }
+        return false;
+    }
+
 }
