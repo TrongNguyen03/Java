@@ -8,17 +8,18 @@ import com.example.PosCafe.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
 @Service
 public class OrderService {
-    @Autowired private OrderRepository orderRepo;
-    @Autowired private PaymentRepository payRepo;
+    @Autowired
+    private OrderRepository orderRepo;
+
+    @Autowired
+    private PaymentRepository payRepo;
 
     public Order saveOrder(Order o) {
         return orderRepo.save(o);
@@ -54,12 +55,32 @@ public class OrderService {
         }
     }
 
-
-    public List<Order> getToday() {
-        LocalDate d = LocalDate.now();
-        Timestamp start = Timestamp.valueOf(d.atStartOfDay());
-        Timestamp end   = Timestamp.valueOf(LocalDateTime.of(d, LocalTime.MAX));
+    public List<Order> getTodayOrders() {
+        LocalDate today = LocalDate.now();
+        Timestamp start = Timestamp.valueOf(today.atStartOfDay());
+        Timestamp end = Timestamp.valueOf(today.atTime(23, 59, 59));
         return orderRepo.findByOrderDatetimeBetween(start, end);
     }
 
+    public List<Order> getMonthOrders() {
+        LocalDate d = LocalDate.now();
+        LocalDate firstDay = d.withDayOfMonth(1);
+        LocalDate lastDay = d.withDayOfMonth(d.lengthOfMonth());
+
+        Timestamp start = Timestamp.valueOf(firstDay.atStartOfDay());
+        Timestamp end = Timestamp.valueOf(lastDay.atTime(LocalTime.MAX));
+
+        return orderRepo.findByOrderDatetimeBetween(start, end);
+    }
+
+    public List<Order> getYearOrders() {
+        LocalDate d = LocalDate.now();
+        LocalDate firstDay = d.withDayOfYear(1);
+        LocalDate lastDay = d.withMonth(12).withDayOfMonth(31);
+
+        Timestamp start = Timestamp.valueOf(firstDay.atStartOfDay());
+        Timestamp end = Timestamp.valueOf(lastDay.atTime(LocalTime.MAX));
+
+        return orderRepo.findByOrderDatetimeBetween(start, end);
+    }
 }

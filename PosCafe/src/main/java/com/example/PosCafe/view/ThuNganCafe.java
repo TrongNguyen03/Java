@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @Component
 public class ThuNganCafe extends JFrame {
@@ -151,7 +152,7 @@ public class ThuNganCafe extends JFrame {
         btnUpdate.addActionListener(e -> {
             String inputId = JOptionPane.showInputDialog(this, "Nhập ID sản phẩm cần cập nhật:");
             if (inputId == null || inputId.trim().isEmpty()) {
-                return; // Người dùng hủy
+                return;
             }
 
 
@@ -222,11 +223,13 @@ public class ThuNganCafe extends JFrame {
         btnClear.addActionListener(e -> clearForm());
 
         JButton btnReport = new JButton("Order Today");
-
+        btnReport.setBounds(670, 75, 150, 25);
+        topPanel.add(btnReport);
+        btnReport.addActionListener(e-> showTodayOrders() );
 
 
         int bx = 400, by = 40, bw = 150, bh = 25, bgap = 35;
-        for (JButton b : new JButton[]{btnAdd, btnUpdate, btnDelete, btnClear, btnReport}) {
+        for (JButton b : new JButton[]{btnAdd, btnUpdate, btnDelete, btnClear}) {
             b.setBounds(bx, by, bw, bh);
             topPanel.add(b);
             by += bgap;
@@ -353,8 +356,6 @@ public class ThuNganCafe extends JFrame {
         JButton btn = new JButton();
         btn.setLayout(new BorderLayout());
         btn.setPreferredSize(new Dimension(250, 130));
-        btn.setMaximumSize(new Dimension(250, 130));
-        btn.setMinimumSize(new Dimension(250, 130));
         btn.setBackground(Color.WHITE);
         btn.setOpaque(true);
 
@@ -407,7 +408,6 @@ public class ThuNganCafe extends JFrame {
 
         return wrapper;
     }
-
 
     private void addProductToOrder(Product p) {
         Optional<OrderItem> existing = currentOrderItems.stream()
@@ -530,7 +530,7 @@ public class ThuNganCafe extends JFrame {
 
 
     private String formatCurrency(BigDecimal amount) {
-        return new DecimalFormat("#,##0").format(amount) + " VND";
+        return new DecimalFormat("#,###").format(amount) + " VND";
     }
 
     private void clearForm() {
@@ -547,6 +547,108 @@ public class ThuNganCafe extends JFrame {
         orderTableModel.setRowCount(0); // Xóa toàn bộ dòng trong bảng hiển thị
         totalLabel.setText("Tổng cộng: " + formatCurrency(currentTotal)); // Cập nhật nhãn tổng cộng
     }
+
+    private JPanel contentPanel;
+
+    private void showTodayOrders(){
+        JPanel panel = new JPanel(new BorderLayout());
+
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnToday = new JButton("Xem đơn hôm nay");
+        JButton btnMonth = new JButton("Xem đơn tháng này");
+        JButton btnYear = new JButton("Xem đơn năm nay");
+
+        topPanel.add(btnToday);
+        topPanel.add(btnMonth);
+        topPanel.add(btnYear);
+        panel.add(topPanel, BorderLayout.NORTH);
+
+        // Khởi tạo contentPanel
+        contentPanel = new JPanel(new BorderLayout());
+        panel.add(contentPanel, BorderLayout.CENTER); // Thêm contentPanel vào panel chính
+
+        Consumer<String> updateTableByType = (type) -> {
+            List<Order> orders;
+            String prefix;
+            switch (type){
+                case "month":
+                    orders = orderService.getMonthOrders();
+                    prefix = "Tổng doanh thu tháng này: ";
+                    break;
+                case "year":
+                    orders = orderService.getYearOrders();
+                    prefix = "Tổng doanh thu năm nay: ";
+                    break;
+                default:
+                    orders = orderService.getTodayOrders();
+                    prefix = "Tổng danh thu hôm nay: ";
+            }
+            updateOrderTable(orders, prefix); // Chỉ truyền orders và prefix
+        };
+
+        updateTableByType.accept("today"); // Mặc định hôm nay
+
+        btnToday.addActionListener(e -> updateTableByType.accept("today"));
+        btnMonth.addActionListener(e -> updateTableByType.accept("month"));
+        btnYear.addActionListener(e -> updateTableByType.accept("year"));
+
+        JDialog dialog = new JDialog(this, "Chi tiết đơn hàng", true);
+        dialog.getContentPane().add(panel);
+        dialog.setSize(800, 450);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
+    // Sửa đổi phương thức để cập nhật contentPanel
+    private void updateOrderTable(List<Order> orders, String prefix) {
+        // Xóa tất cả các thành phần cũ khỏi contentPanel
+        if (contentPanel != null) {
+            contentPanel.removeAll();
+        } else {
+            System.err.println("contentPanel is null in updateOrderTable!");
+            return; // Thoát nếu panel chưa sẵn sàng
+        }
+
+
+        String[] columnNames = {"Mã đơn", "Thời gian", "Tổng tiền", "Ghi chú"};
+
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        DecimalFormat currencyFormat = new DecimalFormat("#,###");
+
+        // Tạo đối tượng SimpleDateFormat với định dạng mong muốn
+        SimpleDateFormat timeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Order o : orders) {
+            // Định dạng Timestamp trước khi thêm vào model
+            String formattedTime = timeFormat.format(o.getOrderDatetime());
+
+            model.addRow(new Object[]{
+                    o.getOrderId(),
+                    formattedTime, // Sử dụng chuỗi đã định dạng
+                    currencyFormat.format(o.getTotalAmount()) + " VND",
+                    o.getNotes()
+            });
+            total = total.add(o.getTotalAmount());
+        }
+
+        JTable table = new JTable(model);
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        JLabel lblTotal = new JLabel(prefix + currencyFormat.format(total) + " VND");
+        lblTotal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Thêm các thành phần mới vào contentPanel
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(lblTotal, BorderLayout.SOUTH);
+
+        // Cập nhật UI
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+
 
 
 

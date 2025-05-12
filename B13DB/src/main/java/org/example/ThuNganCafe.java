@@ -65,7 +65,6 @@ class Product {
     }
 
     //Ô sản phẩm
-    //Ô sản phẩm
     public JButton toDisplayComponent(ActionListener clickAction) {
         JButton button = new JButton();
         // Sử dụng BorderLayout cho nút chính để chia thành 2 vùng: Ảnh (WEST) và Text (CENTER)
