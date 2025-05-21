@@ -20,5 +20,5 @@ public class User {
 
     private String fullName;
 
-    private String role = "USER";
+    private String role ;
 }
