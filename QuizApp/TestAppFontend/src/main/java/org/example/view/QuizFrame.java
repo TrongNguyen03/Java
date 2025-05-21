@@ -3,6 +3,10 @@ package org.example.view;
 import org.example.api.QuizApi;
 import org.example.model.Question;
 import org.example.model.User;
+import org.example.api.ResultApi;
+import org.example.model.Result;
+
+
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -229,19 +233,27 @@ public class QuizFrame extends JFrame {
             }
         }
 
+        // Gửi kết quả lên server
+        Result result = new Result();
+        result.setUserId(currentUser.getId());
+        result.setScore(correct);
+        result.setSubmitTime(java.time.LocalDateTime.now());
 
-        JOptionPane.showMessageDialog(this,
-                "Bạn đã hoàn thành bài thi!\nSố câu đúng: " + correct + "/" + questions.size(),
-                "Kết quả bài thi",
-                JOptionPane.INFORMATION_MESSAGE);
+        boolean submitted = ResultApi.submitResult(result);
 
-        // Reset để làm lại
-        currentQuestionIndex = 0;
-        userAnswers.clear();
-        for (JRadioButton btn : optionButtons) {
-            btn.setSelected(false);
+        if (submitted) {
+            JOptionPane.showMessageDialog(this,
+                    "Bạn đã hoàn thành bài thi!\nSố câu đúng: " + correct + "/" + questions.size(),
+                    "Kết quả bài thi",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Bạn đã hoàn thành bài thi, nhưng gửi kết quả thất bại!",
+                    "Thông báo",
+                    JOptionPane.ERROR_MESSAGE);
         }
-        showQuestion(currentQuestionIndex); // Hiển thị lại câu hỏi đầu tiên
+
+
     }
 
 }

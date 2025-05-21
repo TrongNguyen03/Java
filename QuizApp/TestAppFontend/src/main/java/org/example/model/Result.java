@@ -1,18 +1,20 @@
 package org.example.model;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Result {
     private Long id;
-    private User user;
+
+    private Long userId;
+
     private int score;
+
     private int totalQuestions;
-    private long examDate;
 
-
+    private LocalDateTime submitTime;
 }
