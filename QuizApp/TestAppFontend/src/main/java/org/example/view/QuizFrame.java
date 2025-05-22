@@ -8,6 +8,7 @@ import org.example.model.Result;
 
 
 
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -17,6 +18,7 @@ import java.util.List;
 public class QuizFrame extends JFrame {
     private List<Question> questions;
     private Map<Long, String> userAnswers = new HashMap<>();
+    private Map<Long, List<String>> shuffledOptionsMap = new HashMap<>();
     private int currentQuestionIndex = 0;
     private User currentUser; // Lưu thông tin người dùng
 
@@ -25,8 +27,9 @@ public class QuizFrame extends JFrame {
     private JRadioButton[] optionButtons;
     private ButtonGroup buttonGroup;
     private JButton btnNext;
+    private JButton btnPrevious;
     private JButton btnFinish;
-    private JButton btnAdminPanel; // Nút dành cho Admin
+    private JButton btnOutPanel;
     private JProgressBar progressBar; // Thanh tiến độ
 
     public QuizFrame(User user) {
@@ -55,21 +58,25 @@ public class QuizFrame extends JFrame {
         lblWelcome.setHorizontalAlignment(SwingConstants.RIGHT);
         headerPanel.add(lblWelcome, BorderLayout.EAST);
 
-        if (currentUser.getRole() != null && currentUser.getRole().equalsIgnoreCase("admin")) {
-            btnAdminPanel = new JButton("Quản lý");
-            btnAdminPanel.setFont(new Font("Arial", Font.BOLD, 12));
-            btnAdminPanel.setBackground(new Color(255, 165, 0));
-            btnAdminPanel.setForeground(Color.WHITE);
-            btnAdminPanel.setFocusPainted(false);
-            btnAdminPanel.addActionListener(e -> {
-
-                new AdminQuestionManager(currentUser).setVisible(true);
+        btnOutPanel = new JButton("Đăng xuất");
+        btnOutPanel.setFont(new Font("Arial", Font.BOLD, 12));
+        btnOutPanel.setBackground(new Color(255, 165, 0));
+        btnOutPanel.setForeground(Color.WHITE);
+        btnOutPanel.setFocusPainted(false);
+        btnOutPanel.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Bạn có chắc chắn muốn đăng xuất không?",
+                    "Xác nhận đăng xuất",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+            if (confirm == JOptionPane.YES_OPTION) {
+                new LoginFrame().setVisible(true);
                 dispose();
+            }
             });
-            JPanel adminBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            adminBtnPanel.add(btnAdminPanel);
-            headerPanel.add(adminBtnPanel, BorderLayout.WEST);
-        }
+        JPanel adminBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        adminBtnPanel.add(btnOutPanel);
+        headerPanel.add(adminBtnPanel, BorderLayout.WEST);
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
 
@@ -135,8 +142,17 @@ public class QuizFrame extends JFrame {
         btnNext.setPreferredSize(new Dimension(120, 40));
         btnNext.addActionListener(e -> nextQuestion());
 
-        buttonPanel.add(btnFinish);
+        btnPrevious = new JButton("< Quay lại");
+        btnPrevious.setFont(new Font("Arial", Font.BOLD, 16));
+        btnPrevious.setBackground(new Color(0, 102, 204));
+        btnPrevious.setForeground(Color.WHITE);
+        btnPrevious.setFocusPainted(false);
+        btnPrevious.setPreferredSize(new Dimension(120, 40));
+        btnPrevious.addActionListener(e -> previousQuestion());
+
         buttonPanel.add(btnNext);
+        buttonPanel.add(btnPrevious);
+        buttonPanel.add(btnFinish);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
@@ -145,9 +161,8 @@ public class QuizFrame extends JFrame {
     }
 
     private void showQuestion(int index) {
-        // Cập nhật thanh tiến độ
         progressBar.setValue(index);
-        progressBar.setString("Câu " + (index) + " / " + questions.size());
+        progressBar.setString("Câu " + (index + 1) + " / " + questions.size());
 
         if (index >= questions.size()) {
             finishQuiz();
@@ -158,49 +173,71 @@ public class QuizFrame extends JFrame {
         lblQuestionContent.setText("<html>" + q.getContent() + "</html>");
         lblQuestionCounter.setText("Câu " + (index + 1) + " / " + questions.size());
 
-        List<String> options = q.getOptions();
-        // Xáo trộn thứ tự các lựa chọn
-        Collections.shuffle(options);
+        List<String> options;
+
+        // Nếu câu hỏi này chưa shuffle, thì shuffle và lưu lại
+        if (!shuffledOptionsMap.containsKey(q.getId())) {
+            options = new ArrayList<>(q.getOptions());
+            Collections.shuffle(options);
+            shuffledOptionsMap.put(q.getId(), options);
+        } else {
+            options = shuffledOptionsMap.get(q.getId());
+        }
+
+        // Hiển thị các phương án
+        String previousAnswer = userAnswers.get(q.getId());
+        buttonGroup.clearSelection();
 
         for (int i = 0; i < optionButtons.length; i++) {
             if (i < options.size()) {
-                optionButtons[i].setText(options.get(i));
+                String optionText = options.get(i);
+                optionButtons[i].setText(optionText);
                 optionButtons[i].setVisible(true);
+
+                if (optionText.equals(previousAnswer)) {
+                    optionButtons[i].setSelected(true);
+                }
             } else {
                 optionButtons[i].setVisible(false);
             }
-            optionButtons[i].setSelected(false);
         }
-        buttonGroup.clearSelection();
+
+        // Cập nhật nút
+        btnNext.setText(index == questions.size() - 1 ? "Hoàn thành" : "Câu tiếp >");
+    }
 
 
-        if (index == questions.size() - 1) {
-            btnNext.setText("Hoàn thành");
+    private void nextQuestion() {
+        saveCurrentAnswer(); // Lưu nếu có chọn
+
+        if (currentQuestionIndex < questions.size() - 1) {
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
         } else {
-            btnNext.setText("Câu tiếp >");
+            finishQuiz();
         }
     }
 
-    private void nextQuestion() {
-        Question current = questions.get(currentQuestionIndex);
 
-        boolean optionSelected = false;
+
+    private void previousQuestion() {
+        if (currentQuestionIndex > 0) {
+            saveCurrentAnswer(); // lưu lại nếu người dùng có chọn
+            currentQuestionIndex--;
+            showQuestion(currentQuestionIndex);
+        }
+    }
+
+    private void saveCurrentAnswer() {
+        Question current = questions.get(currentQuestionIndex);
         for (JRadioButton btn : optionButtons) {
             if (btn.isSelected()) {
                 userAnswers.put(current.getId(), btn.getText());
-                optionSelected = true;
                 break;
             }
         }
-
-        if (!optionSelected && currentQuestionIndex < questions.size() -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn một đáp án trước khi chuyển câu.", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        currentQuestionIndex++;
-        showQuestion(currentQuestionIndex);
     }
+
 
     private void finishQuizConfirmation() {
         int confirm = JOptionPane.showConfirmDialog(this,
@@ -253,6 +290,9 @@ public class QuizFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
 
+        dispose();
+        new  LoginFrame().setVisible(true);
+//      new ScoreView().setVisible(true);
 
     }
 

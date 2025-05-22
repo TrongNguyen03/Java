@@ -11,13 +11,14 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class ResultApi {
     private static final String BASE_URL = "http://localhost:8080/api/results";
 
-    // ✅ Gửi kết quả lên server
+
     public static boolean submitResult(Result result) {
         try {
             URL url = new URL(BASE_URL);
@@ -78,7 +79,8 @@ public class ResultApi {
             e.printStackTrace();
         }
 
-        return null;
+        return new ArrayList<>();
+
     }
 
 

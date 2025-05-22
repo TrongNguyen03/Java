@@ -9,6 +9,7 @@ import java.util.List;
 
 @Service
 public class ResultService {
+
     @Autowired
     private ResultRepository resultRepo;
 
@@ -19,4 +20,8 @@ public class ResultService {
     public List<Result> getResultsByUser(Long userId) {
         return resultRepo.findByUserId(userId);
     }
+
+//    public List<Result> getAllResults() {
+//        return resultRepo.findAll();
+//    }
 }

@@ -25,5 +25,11 @@ public class ResultController {
     public ResponseEntity<List<Result>> getUserResults(@PathVariable Long userId) {
         return ResponseEntity.ok(resultService.getResultsByUser(userId));
     }
+
+
+//    @GetMapping
+//    public ResponseEntity<List<Result>> getAllResults() {
+//        return ResponseEntity.ok(resultService.getAllResults());
+//    }
 }
 

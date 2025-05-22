@@ -7,25 +7,19 @@ import org.example.model.User;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.List;
 
 public class AdminQuestionManager extends JFrame {
     private JTable table;
     private DefaultTableModel tableModel;
-    private User currentUser;
-
-
 
     public AdminQuestionManager(User user) {
-        this.currentUser = user;
-
-
         setTitle("Quản lý câu hỏi");
         setSize(900, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
 
         String[] columnNames = {"ID", "Nội dung", "Đáp án A", "B", "C", "D", "Đúng"};
         tableModel = new DefaultTableModel(columnNames, 0) {
@@ -48,17 +42,24 @@ public class AdminQuestionManager extends JFrame {
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        table.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
-        table.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
+        table.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // ID column
+        table.getColumnModel().getColumn(6).setCellRenderer(centerRenderer); // Correct Answer column
 
 
         table.getColumnModel().getColumn(0).setPreferredWidth(50);
         table.getColumnModel().getColumn(1).setPreferredWidth(300);
         table.getColumnModel().getColumn(6).setPreferredWidth(70);
 
+        // Ẩn ID (column index 0)
+        TableColumn idColumn = table.getColumnModel().getColumn(0);
+        idColumn.setMinWidth(0);
+        idColumn.setMaxWidth(0);
+        idColumn.setWidth(0);
+        idColumn.setPreferredWidth(0);
+        idColumn.setResizable(false);
+
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBackground(new Color(240, 240, 240));
@@ -70,12 +71,13 @@ public class AdminQuestionManager extends JFrame {
         JButton btnAdd = createStyledButton("Thêm", new Color(40, 167, 69));
         JButton btnEdit = createStyledButton("Sửa", new Color(0, 123, 255));
         JButton btnDelete = createStyledButton("Xóa", new Color(220, 53, 69));
-        JButton btnBack = createStyledButton("Quay lại", new Color(108, 117, 125));
+        JButton btnUser = createStyledButton("Quản lý nick", new Color(80, 227, 74));
+        JButton btnBack = createStyledButton("Đăng xuất", new Color(108, 117, 125));
 
         actionButtonPanel.add(btnAdd);
         actionButtonPanel.add(btnEdit);
         actionButtonPanel.add(btnDelete);
-
+        actionButtonPanel.add(btnUser);
 
         JPanel backButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         backButtonPanel.setOpaque(false);
@@ -84,14 +86,15 @@ public class AdminQuestionManager extends JFrame {
         bottomPanel.add(backButtonPanel, BorderLayout.WEST);
         bottomPanel.add(actionButtonPanel, BorderLayout.EAST);
 
-
-
         add(scrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
 
-
         loadQuestions();
 
+        btnUser.addActionListener(e -> {
+            dispose();
+            new UserManagementFrame().setVisible(true);
+        });
 
         btnAdd.addActionListener(e -> {
             QuestionDialog dialog = new QuestionDialog(this, null);
@@ -143,14 +146,11 @@ public class AdminQuestionManager extends JFrame {
             }
         });
 
-
         btnBack.addActionListener(e -> {
-
-            new QuizFrame(currentUser).setVisible(true); // Quay lại với đúng user admin
+            new LoginFrame().setVisible(true);
             dispose();
         });
     }
-
 
     private JButton createStyledButton(String text, Color bgColor) {
         JButton button = new JButton(text);
@@ -195,7 +195,6 @@ public class AdminQuestionManager extends JFrame {
                 tableModel.addRow(rowData);
             }
         } else {
-
             JOptionPane.showMessageDialog(this, "Không có câu hỏi nào trong hệ thống.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
         }
     }

@@ -12,8 +12,10 @@ public class LoginFrame extends JFrame {
     private JTextField txtUsername;
     private JPasswordField txtPassword;
     private JButton btnLogin;
+    private User currentUser;
 
     public LoginFrame() {
+
         setTitle("Đăng nhập Hệ thống Thi trắc nghiệm");
         setSize(400, 280);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -70,8 +72,17 @@ public class LoginFrame extends JFrame {
 
             User user = UserApi.login(username, password);
             if (user != null) {
-                new QuizFrame(user).setVisible(true);
-                dispose();
+                currentUser = user;
+
+                if (currentUser.getRole() != null && currentUser.getRole().equalsIgnoreCase("admin")) {
+                    new AdminQuestionManager(currentUser).setVisible(true);
+                    dispose();
+                } else if (currentUser.getRole() != null && currentUser.getRole().equalsIgnoreCase("user")) {
+                    new QuizFrame(currentUser).setVisible(true);
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Không xác định vai trò người dùng.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Sai tài khoản hoặc mật khẩu.", "Lỗi đăng nhập", JOptionPane.ERROR_MESSAGE);
             }
