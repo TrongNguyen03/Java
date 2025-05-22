@@ -19,7 +19,7 @@ public class LoginFrame extends JFrame {
         setTitle("Đăng nhập Hệ thống Thi trắc nghiệm");
         setSize(400, 280);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Giữa màn hình
+        setLocationRelativeTo(null);
 
 
         JPanel mainPanel = new JPanel();
@@ -77,11 +77,9 @@ public class LoginFrame extends JFrame {
                 if (currentUser.getRole() != null && currentUser.getRole().equalsIgnoreCase("admin")) {
                     new AdminQuestionManager(currentUser).setVisible(true);
                     dispose();
-                } else if (currentUser.getRole() != null && currentUser.getRole().equalsIgnoreCase("user")) {
+                } else {
                     new QuizFrame(currentUser).setVisible(true);
                     dispose();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Không xác định vai trò người dùng.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Sai tài khoản hoặc mật khẩu.", "Lỗi đăng nhập", JOptionPane.ERROR_MESSAGE);

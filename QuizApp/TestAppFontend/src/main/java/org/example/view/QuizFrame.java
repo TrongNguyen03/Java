@@ -6,9 +6,6 @@ import org.example.model.User;
 import org.example.api.ResultApi;
 import org.example.model.Result;
 
-
-
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -40,7 +37,7 @@ public class QuizFrame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 
-        questions = QuizApi.getRandomQuestions(10);
+        questions = QuizApi.getRandomQuestions(20);
         if (questions.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Không có câu hỏi nào để hiển thị.", "Thông báo", JOptionPane.WARNING_MESSAGE);
             dispose();
@@ -292,7 +289,7 @@ public class QuizFrame extends JFrame {
 
         dispose();
         new  LoginFrame().setVisible(true);
-//      new ScoreView().setVisible(true);
+//      new ScoreView(currentUser).setVisible(true);
 
     }
 

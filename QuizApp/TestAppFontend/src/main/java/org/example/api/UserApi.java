@@ -110,4 +110,22 @@ public class UserApi {
         return new ArrayList<>();
     }
 
+    public static User getUserById(Long userId) {
+        try {
+            Request request = new Request.Builder()
+                    .url(BASE_URL + "/users/" + userId) // Endpoint để lấy người dùng theo ID
+                    .get()
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                String json = response.body().string();
+                return gson.fromJson(json, User.class);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

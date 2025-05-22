@@ -21,7 +21,7 @@ public class ResultService {
         return resultRepo.findByUserId(userId);
     }
 
-//    public List<Result> getAllResults() {
-//        return resultRepo.findAll();
-//    }
+    public List<Result> getAllResults() {
+        return resultRepo.findAll();
+    }
 }

@@ -15,6 +15,7 @@ public class AdminQuestionManager extends JFrame {
     private JTable table;
     private DefaultTableModel tableModel;
 
+
     public AdminQuestionManager(User user) {
         setTitle("Quản lý câu hỏi");
         setSize(900, 500);
@@ -71,13 +72,19 @@ public class AdminQuestionManager extends JFrame {
         JButton btnAdd = createStyledButton("Thêm", new Color(40, 167, 69));
         JButton btnEdit = createStyledButton("Sửa", new Color(0, 123, 255));
         JButton btnDelete = createStyledButton("Xóa", new Color(220, 53, 69));
-        JButton btnUser = createStyledButton("Quản lý nick", new Color(80, 227, 74));
+        JButton btnUser = createStyledButton("Quản lý nick", new Color(63, 181, 59));
+        JButton btnScore = createStyledButton("Xem điểm", new Color(5, 68, 120));
         JButton btnBack = createStyledButton("Đăng xuất", new Color(108, 117, 125));
+
+
 
         actionButtonPanel.add(btnAdd);
         actionButtonPanel.add(btnEdit);
         actionButtonPanel.add(btnDelete);
         actionButtonPanel.add(btnUser);
+        actionButtonPanel.add(btnScore);
+
+
 
         JPanel backButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         backButtonPanel.setOpaque(false);
@@ -94,6 +101,12 @@ public class AdminQuestionManager extends JFrame {
         btnUser.addActionListener(e -> {
             dispose();
             new UserManagementFrame().setVisible(true);
+        });
+
+        btnScore.addActionListener(e -> {
+
+            new ScoreView(user).setVisible(true);
+            dispose();
         });
 
         btnAdd.addActionListener(e -> {
@@ -150,6 +163,8 @@ public class AdminQuestionManager extends JFrame {
             new LoginFrame().setVisible(true);
             dispose();
         });
+
+
     }
 
     private JButton createStyledButton(String text, Color bgColor) {
@@ -198,4 +213,6 @@ public class AdminQuestionManager extends JFrame {
             JOptionPane.showMessageDialog(this, "Không có câu hỏi nào trong hệ thống.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+
+
 }

@@ -27,9 +27,9 @@ public class ResultController {
     }
 
 
-//    @GetMapping
-//    public ResponseEntity<List<Result>> getAllResults() {
-//        return ResponseEntity.ok(resultService.getAllResults());
-//    }
+    @GetMapping
+    public ResponseEntity<List<Result>> getAllResults() {
+        return ResponseEntity.ok(resultService.getAllResults());
+    }
 }
 
