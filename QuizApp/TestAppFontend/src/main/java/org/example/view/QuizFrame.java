@@ -147,9 +147,10 @@ public class QuizFrame extends JFrame {
         btnPrevious.setPreferredSize(new Dimension(120, 40));
         btnPrevious.addActionListener(e -> previousQuestion());
 
+
+        buttonPanel.add(btnFinish);
         buttonPanel.add(btnNext);
         buttonPanel.add(btnPrevious);
-        buttonPanel.add(btnFinish);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
@@ -277,8 +278,8 @@ public class QuizFrame extends JFrame {
 
         if (submitted) {
             JOptionPane.showMessageDialog(this,
-                    "Bạn đã hoàn thành bài thi!\nSố câu đúng: " + correct + "/" + questions.size(),
-                    "Kết quả bài thi",
+                    "Bạn đã hoàn thành bài thi!",
+                    "Xác nhận hoàn thành",
                     JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this,
@@ -289,7 +290,6 @@ public class QuizFrame extends JFrame {
 
         dispose();
         new  LoginFrame().setVisible(true);
-//      new ScoreView(currentUser).setVisible(true);
 
     }
 

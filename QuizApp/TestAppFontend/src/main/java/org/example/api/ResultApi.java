@@ -83,6 +83,38 @@ public class ResultApi {
 
     }
 
+    // Phương thức xóa tất cả kết quả
+    public static boolean truncateResults() {
+        try {
+            URL url = new URL(BASE_URL + "/truncate");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("DELETE");
+            conn.setDoOutput(false);
+            int responseCode = conn.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_NO_CONTENT || responseCode == HttpURLConnection.HTTP_OK) {
+                return true;
+            } else {
+                System.err.println("Xóa tất cả kết quả thất bại, mã lỗi: " + responseCode);
+
+                try (Scanner errorScanner = new Scanner(conn.getErrorStream())) {
+                    StringBuilder errorResponse = new StringBuilder();
+                    while (errorScanner.hasNext()) {
+                        errorResponse.append(errorScanner.nextLine());
+                    }
+                    System.err.println("Phản hồi lỗi từ server: " + errorResponse.toString());
+                } catch (Exception e) {
+
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+
 
 
 }

@@ -2,6 +2,7 @@ package com.example.TestApp.service;
 
 import com.example.TestApp.model.Result;
 import com.example.TestApp.repository.ResultRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,5 +24,10 @@ public class ResultService {
 
     public List<Result> getAllResults() {
         return resultRepo.findAll();
+    }
+
+    @Transactional // Đảm bảo hoạt động trong một giao dịch
+    public void deleteAllResults() {
+        resultRepo.deleteAll();
     }
 }

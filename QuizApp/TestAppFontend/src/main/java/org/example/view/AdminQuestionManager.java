@@ -77,13 +77,11 @@ public class AdminQuestionManager extends JFrame {
         JButton btnBack = createStyledButton("Đăng xuất", new Color(108, 117, 125));
 
 
-
         actionButtonPanel.add(btnAdd);
         actionButtonPanel.add(btnEdit);
         actionButtonPanel.add(btnDelete);
-        actionButtonPanel.add(btnUser);
         actionButtonPanel.add(btnScore);
-
+        actionButtonPanel.add(btnUser);
 
 
         JPanel backButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
