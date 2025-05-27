@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 
 public class AdminQuestionManager extends JFrame {
@@ -17,7 +18,7 @@ public class AdminQuestionManager extends JFrame {
 
 
     public AdminQuestionManager(User user) {
-        setTitle("Quản lý câu hỏi");
+        setTitle("Quản lý câu hỏi - Admin");
         setSize(900, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -75,8 +76,10 @@ public class AdminQuestionManager extends JFrame {
         JButton btnUser = createStyledButton("Quản lý nick", new Color(63, 181, 59));
         JButton btnScore = createStyledButton("Xem điểm", new Color(5, 68, 120));
         JButton btnBack = createStyledButton("Đăng xuất", new Color(108, 117, 125));
+        JButton btnImportExcel = createStyledButton("Import Excel", new Color(255, 193, 7));
 
 
+        actionButtonPanel.add(btnImportExcel);
         actionButtonPanel.add(btnAdd);
         actionButtonPanel.add(btnEdit);
         actionButtonPanel.add(btnDelete);
@@ -114,6 +117,36 @@ public class AdminQuestionManager extends JFrame {
                 loadQuestions();
             }
         });
+
+        btnImportExcel.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int option = fileChooser.showOpenDialog(this);
+            if (option == JFileChooser.APPROVE_OPTION) {
+                try {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    List<Question> questions = ExcelImporter.readQuestionsFromExcel(selectedFile);
+
+                    int successCount = 0;
+                    for (Question q : questions) {
+                        if (QuizApi.createQuestion(q)) {
+                            successCount++;
+                        }
+                    }
+
+                    JOptionPane.showMessageDialog(this,
+                            "Đã import thành công " + successCount + "/" + questions.size() + " câu hỏi.",
+                            "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+
+                    loadQuestions();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this,
+                            "Lỗi khi đọc file Excel: " + ex.getMessage(),
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
 
         btnEdit.addActionListener(e -> {
             int selected = table.getSelectedRow();

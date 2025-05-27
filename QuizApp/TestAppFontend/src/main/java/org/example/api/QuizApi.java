@@ -36,41 +36,6 @@ public class QuizApi {
         return Collections.emptyList();
     }
 
-    public static int getQuestionLimit() {
-        try {
-            URL url = new URL(BASE_URL + "/settings/question-limit");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-
-            try (Scanner scanner = new Scanner(conn.getInputStream())) {
-                return scanner.nextInt();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 10; // fallback
-        }
-    }
-
-    public static boolean updateQuestionLimit(int limit) {
-        try {
-            URL url = new URL(BASE_URL + "/settings/question-limit");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(String.valueOf(limit).getBytes());
-            }
-
-            return conn.getResponseCode() == 200;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-
     // Lấy câu hỏi theo ID
     public static Question getQuestionById(Long id) {
         Request request = new Request.Builder()
@@ -153,6 +118,5 @@ public class QuizApi {
         }
         return Collections.emptyList();
     }
-
 
 }

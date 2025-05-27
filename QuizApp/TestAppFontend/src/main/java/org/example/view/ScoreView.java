@@ -140,7 +140,7 @@ public class ScoreView extends JFrame {
     }
 
     private void loadResults(DefaultTableModel model) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
         List<Result> results = ResultApi.getAllResults();
         model.setRowCount(0);
 
