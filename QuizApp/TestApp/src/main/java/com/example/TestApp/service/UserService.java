@@ -1,34 +1,19 @@
 package com.example.TestApp.service;
 
 import com.example.TestApp.model.User;
-import com.example.TestApp.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
-public class UserService {
-    @Autowired
-    private UserRepository userRepo;
 
-    public User login(String username, String password) {
-        return userRepo.findByUsernameAndPassword(username, password).orElse(null);
-    }
+public interface UserService {
 
-    public User save(User user) {
-        return userRepo.save(user);
-    }
+    User login(String username, String password);
 
-    public List<User> getAll() {
-        return userRepo.findAll();
-    }
+    User save(User user);
 
-    public User getById(Long id) {
-        return userRepo.findById(id).orElse(null);
-    }
+    List<User> getAll();
 
-    public void delete(Long id) {
-        userRepo.deleteById(id);
-    }
+    User getById(Long id);
+
+    void delete(Long id);
 }
