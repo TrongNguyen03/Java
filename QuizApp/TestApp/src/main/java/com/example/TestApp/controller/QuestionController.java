@@ -9,72 +9,56 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/questions")
-@CrossOrigin(origins = "*") // Cho phép frontend gọi API nếu cần
+@CrossOrigin(origins = "*")
 public class QuestionController {
 
     @Autowired
     private QuestionService questionService;
 
-    // Lấy danh sách câu hỏi ngẫu nhiên
+    private List<QuestionDTO> mapToDTOList(List<Question> questions) {
+        return questions.stream().map(QuestionMapper::toDTO).collect(Collectors.toList());
+    }
+
     @GetMapping("/random")
     public ResponseEntity<List<QuestionDTO>> getRandomQuestions(
-            @RequestParam(name = "limit", required = false, defaultValue = "5") int count) {
-        List<Question> questions = questionService.getRandomQuestions(count);
-        List<QuestionDTO> dtos = questions.stream()
-                .map(QuestionMapper::toDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+            @RequestParam(name = "limit", defaultValue = "5") int count) {
+        return ResponseEntity.ok(mapToDTOList(questionService.getRandomQuestions(count)));
     }
 
-    // Lấy tất cả câu hỏi
     @GetMapping
     public ResponseEntity<List<QuestionDTO>> getAllQuestions() {
-        List<Question> questions = questionService.getAllQuestions();
-        List<QuestionDTO> dtos = questions.stream()
-                .map(QuestionMapper::toDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(mapToDTOList(questionService.getAllQuestions()));
     }
 
-    // Lấy 1 câu hỏi theo ID
     @GetMapping("/{id}")
     public ResponseEntity<QuestionDTO> getQuestionById(@PathVariable Long id) {
-        Optional<Question> question = questionService.getQuestionById(id);
-        return question.map(q -> ResponseEntity.ok(QuestionMapper.toDTO(q)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return questionService.getQuestionById(id)
+                .map(q -> ResponseEntity.ok(QuestionMapper.toDTO(q)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // Thêm mới câu hỏi
     @PostMapping
     public ResponseEntity<QuestionDTO> createQuestion(@RequestBody QuestionDTO dto) {
-        Question question = QuestionMapper.toEntity(dto);
-        Question saved = questionService.createQuestion(question);
-        return ResponseEntity.ok(QuestionMapper.toDTO(saved));
+        return ResponseEntity.ok(QuestionMapper.toDTO(
+                questionService.createQuestion(QuestionMapper.toEntity(dto))));
     }
 
-    // Cập nhật câu hỏi
     @PutMapping("/{id}")
     public ResponseEntity<QuestionDTO> updateQuestion(@PathVariable Long id, @RequestBody QuestionDTO dto) {
         Question updated = questionService.updateQuestion(id, QuestionMapper.toEntity(dto));
-        if (updated == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(QuestionMapper.toDTO(updated));
+        return updated != null
+                ? ResponseEntity.ok(QuestionMapper.toDTO(updated))
+                : ResponseEntity.notFound().build();
     }
 
-    // Xoá câu hỏi
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
-        boolean deleted = questionService.deleteQuestion(id);
-        if (deleted) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return questionService.deleteQuestion(id)
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
     }
 }
