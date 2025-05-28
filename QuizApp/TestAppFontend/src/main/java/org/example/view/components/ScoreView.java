@@ -34,7 +34,7 @@ public class ScoreView extends JFrame {
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
         add(titleLabel, BorderLayout.NORTH);
 
-        String[] columnNames = {"Tên Người Dùng", "Điểm Số", "Thời Gian Nộp Bài"};
+        String[] columnNames = {"Xếp Hạng","Tên Người Dùng", "Điểm Số", "Thời Gian Nộp Bài"};
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -143,10 +143,13 @@ public class ScoreView extends JFrame {
     private void loadResults(DefaultTableModel model) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
         List<Result> results = ResultApi.getAllResults();
+        // Sắp xếp danh sách theo điểm số giảm dần
+        results.sort((r1, r2) -> Double.compare(r2.getScore(), r1.getScore()));
         model.setRowCount(0);
 
 
         if (results != null && !results.isEmpty()) {
+            int rank = 1;
             for (Result result : results) {
 
                 if (result == null || result.getUserId() == null) {
@@ -170,6 +173,7 @@ public class ScoreView extends JFrame {
                 String userFullName = getUserFullName(result.getUserId());
 
                 Object[] rowData = {
+                        rank++,
                         userFullName,
                         result.getScore(),
                         formattedSubmitTime

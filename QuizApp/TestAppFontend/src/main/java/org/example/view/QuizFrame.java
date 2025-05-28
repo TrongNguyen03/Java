@@ -7,6 +7,7 @@ import org.example.api.ResultApi;
 import org.example.model.Result;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.*;
@@ -16,6 +17,10 @@ public class QuizFrame extends JFrame {
     private List<Question> questions;
     private Map<Long, String> userAnswers = new HashMap<>();
     private Map<Long, List<String>> shuffledOptionsMap = new HashMap<>();
+    private JLabel lblTimer;
+    private Timer countdownTimer;
+    private int timeRemainingInSeconds = 20 * 60;
+
     private int currentQuestionIndex = 0;
     private User currentUser; // Lưu thông tin người dùng
 
@@ -80,10 +85,31 @@ public class QuizFrame extends JFrame {
         JPanel quizContentPanel = new JPanel(new BorderLayout(0, 15));
         quizContentPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
+        //  bộ đếm thời gian bên phải
+        lblTimer = new JLabel();
+        lblTimer.setFont(new Font("Arial", Font.BOLD, 14));
+        lblTimer.setForeground(Color.RED);
+        updateTimerLabel();
+
+        headerPanel.add(lblTimer, BorderLayout.CENTER);
+
+        // Bắt đầu timer đếm ngược
+        countdownTimer = new Timer(1000, e -> {
+            timeRemainingInSeconds--;
+            updateTimerLabel();
+            if (timeRemainingInSeconds <= 0) {
+                countdownTimer.stop();
+                JOptionPane.showMessageDialog(this, "Hết thời gian làm bài!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                finishQuiz();
+            }
+        });
+        countdownTimer.start();
+
+
 
         progressBar = new JProgressBar(0, questions.size());
         progressBar.setValue(0);
-        progressBar.setStringPainted(true); // Hiển thị phần trăm/giá trị
+        progressBar.setStringPainted(true); // Hiển thị phần trăm giá trị
         progressBar.setFont(new Font("Arial", Font.PLAIN, 12));
         progressBar.setForeground(new Color(0, 153, 51));
         progressBar.setBackground(new Color(230, 230, 230));
@@ -292,5 +318,13 @@ public class QuizFrame extends JFrame {
         new  LoginFrame().setVisible(true);
 
     }
+
+    private void updateTimerLabel() {
+        int minutes = timeRemainingInSeconds / 60;
+        int seconds = timeRemainingInSeconds % 60;
+        String timeFormatted = String.format("Thời gian còn lại: %02d:%02d", minutes, seconds);
+        lblTimer.setText(timeFormatted);
+    }
+
 
 }
