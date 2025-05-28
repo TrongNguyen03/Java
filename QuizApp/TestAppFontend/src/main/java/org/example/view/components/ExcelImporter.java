@@ -1,4 +1,4 @@
-package org.example.view;
+package org.example.view.components;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;

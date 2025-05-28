@@ -3,6 +3,9 @@ package org.example.view;
 import org.example.api.QuizApi;
 import org.example.model.Question;
 import org.example.model.User;
+import org.example.view.components.ExcelImporter;
+import org.example.view.components.QuestionDialog;
+import org.example.view.components.ScoreView;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;

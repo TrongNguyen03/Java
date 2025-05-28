@@ -1,9 +1,11 @@
-package org.example.view;
+package org.example.view.components;
 
 import org.example.api.ResultApi;
 import org.example.api.UserApi;
 import org.example.model.Result;
 import org.example.model.User;
+import org.example.view.AdminQuestionManager;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -12,7 +14,6 @@ import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects; // Import Objects để sử dụng Objects.requireNonNull
 
 public class ScoreView extends JFrame {
     private JTable resultTable;

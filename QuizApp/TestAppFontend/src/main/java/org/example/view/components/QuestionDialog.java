@@ -1,4 +1,4 @@
-package org.example.view;
+package org.example.view.components;
 
 import org.example.api.QuizApi;
 import org.example.model.Question;

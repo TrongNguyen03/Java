@@ -2,6 +2,7 @@ package org.example.view;
 
 import org.example.api.UserApi;
 import org.example.model.User;
+import org.example.view.components.UserDialog;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
