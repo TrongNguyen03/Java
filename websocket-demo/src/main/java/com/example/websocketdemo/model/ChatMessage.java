@@ -1,5 +1,6 @@
 package com.example.websocketdemo.model;
 
+
 public class ChatMessage {
     private MessageType type;
     private String content;
