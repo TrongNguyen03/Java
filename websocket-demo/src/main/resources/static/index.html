@@ -5,6 +5,11 @@
     <title>Spring Boot WebSocket Chat Application</title>
     <link rel="stylesheet" href="/css/main.css" />
 </head>
+<!-- Lightbox Overlay -->
+<div id="imgLightbox" class="img-lightbox" style="display:none;">
+    <span class="img-lightbox-close" id="imgLightboxClose">&times;</span>
+    <img class="img-lightbox-content" id="imgLightboxImg" src="" alt="">
+</div>
 <body>
 <noscript>
     <h2>Sorry! Your browser doesn't support Javascript</h2>
@@ -35,8 +40,18 @@
         <ul id="messageArea">
 
         </ul>
-        <form id="messageForm" name="messageForm">
+        <form id="messageForm" name="messageForm" autocomplete="off">
             <div class="form-group">
+                <div class="file-row">
+                    <label for="fileInput" class="custom-file-label">
+                        <svg width="22" height="22" viewBox="0 0 20 20" fill="#128ff2">
+                            <path d="M16.88 9.29l-6.17-6.17a2.12 2.12 0 0 0-3 3l.71.71 1.42-1.42-.71-.71a.5.5 0 1 1 .71-.71l6.17 6.17a2.12 2.12 0 0 1 0 3 2.12 2.12 0 0 1-3 0l-.71-.71-1.42 1.42.71.71a4.12 4.12 0 1 0 5.83-5.83z"/>
+                        </svg>
+                        <span style="margin-left: 4px;">File</span>
+                        <input type="file" id="fileInput" style="display:none;"/>
+                    </label>
+                    <span id="fileStatus" class="file-status"></span>
+                </div>
                 <div class="input-group clearfix">
                     <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
                     <button type="submit" class="primary">Send</button>

@@ -153,11 +153,17 @@ button.accent {
    width: 100%;
    text-align: center;
    clear: both;
+   background: #f1f8ff;
+   border-radius: 5px;
+   margin: 7px 0;
+   padding: 3px 0;
 }
 #chat-page .event-message p {
-   color: #777;
-   font-size: 14px;
-   word-wrap: break-word;
+   color: #128ff2;
+   font-size: 15px;
+   font-weight: 600;
+   margin: 0;
+   word-break: break-word;
 }
 #chat-page .chat-message {
    padding-left: 68px;
@@ -186,32 +192,71 @@ button.accent {
 #chat-page .chat-message p {
    color: #43464b;
 }
-#messageForm .input-group input {
-   float: left;
-   width: calc(100% - 85px);
+#messageForm .input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0;
 }
-#messageForm .input-group button {
-   float: left;
-   width: 80px;
-   height: 38px;
-   margin-left: 5px;
+#messageForm .input-group input.form-control {
+    flex: 1 1 auto;
+    margin-right: 0;
+    min-width: 0;
 }
-.chat-header {
-   text-align: center;
-   padding: 15px;
-   border-bottom: 1px solid #ececec;
+#messageForm .input-group button.primary {
+    margin-left: 0;
+    flex-shrink: 0;
 }
-.chat-header h2 {
-   margin: 0;
-   font-weight: 500;
+.file-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    justify-content: flex-start;
+    gap: 8px;
 }
-.connecting {
-   padding-top: 5px;
-   text-align: center;
-   color: #777;
-   position: absolute;
-   top: 65px;
-   width: 100%;
+.custom-file-label {
+    display: flex;
+    align-items: center;
+    background: #e8e8e8;
+    border-radius: 3px;
+    color: #128ff2;
+    padding: 0 12px;
+    font-size: 15px;
+    cursor: pointer;
+    border: 1px solid #c8c8c8;
+    transition: background 0.2s;
+    height: 38px;
+    gap: 4px;
+}
+.custom-file-label:hover {
+    background: #d1ecff;
+}
+.custom-file-label input[type="file"] {
+    display: none;
+}
+.file-status {
+    color: #128ff2;
+    font-size: 14px;
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.file-status .remove-file {
+    color: #ff4743;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 6px;
+    background: none;
+    border: none;
+}
+#chat-page .chat-message img {
+    max-width: 200px;
+    max-height: 200px;
+    display: block;
+    margin-top: 8px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 @media screen and (max-width: 730px) {
@@ -250,4 +295,35 @@ button.accent {
    .chat-header h2 {
        font-size: 1.1em;
    }
+}
+.img-lightbox {
+    display: none;
+    position: fixed;
+    z-index: 1100;
+    left: 0; top: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.8);
+    justify-content: center; align-items: center;
+}
+.img-lightbox-content {
+    max-width: 90vw;
+    max-height: 90vh;
+    display: block;
+    margin: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 20px #000a;
+    background: #fff;
+    padding: 6px;
+}
+.img-lightbox-close {
+    position: absolute;
+    top: 30px; right: 50px;
+    color: #fff;
+    font-size: 2.5em;
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 1200;
+    text-shadow: 0 2px 6px #000c;
+}
+@media (max-width: 500px) {
+    .img-lightbox-close { top: 10px; right: 16px; font-size: 2em; }
 }
