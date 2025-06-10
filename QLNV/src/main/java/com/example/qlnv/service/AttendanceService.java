@@ -18,20 +18,20 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AttendanceService {
-    private final AttendanceRepository AttendanceRepository;
-    private final EmployeeRepository EmployeeRepository;
+    private final AttendanceRepository attendanceRepository;
+    private final EmployeeRepository employeeRepository;
 
     public void recordAttendance(Employee employee, LocalDate date, boolean present) {
-        if (!AttendanceRepository.existsByEmployeeAndDate(employee, date)) {
+        if (!attendanceRepository.existsByEmployeeAndDate(employee, date)) {
             Attendance attendance = new Attendance(null, employee, date, present);
-            AttendanceRepository.save(attendance);
+            attendanceRepository.save(attendance);
         }
     }
 
     public long getWorkingDays(Employee employee, YearMonth month) {
         LocalDate start = month.atDay(1);
         LocalDate end = month.atEndOfMonth();
-        List<Attendance> attendances = AttendanceRepository.findByEmployeeAndDateBetween(employee, start, end);
+        List<Attendance> attendances = attendanceRepository.findByEmployeeAndDateBetween(employee, start, end);
         return attendances.stream().filter(Attendance::isPresent).count();
     }
 
@@ -50,7 +50,7 @@ public class AttendanceService {
         header.createCell(2).setCellValue("Working Days");
         header.createCell(3).setCellValue("Calculated Salary");
 
-        List<Employee> employees = EmployeeRepository.findAll();
+        List<Employee> employees = employeeRepository.findAll();
         int rowIdx = 1;
         for (Employee emp : employees) {
             long days = getWorkingDays(emp, month);
