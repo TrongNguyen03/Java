@@ -20,6 +20,7 @@ import java.sql.*;
 public class MainQLNV {
     static JFrame frame;
     static DefaultTableModel tableModel;
+    private static Connection conn;
 
     static class NhanVien {
             private String maNhanVien;
@@ -63,6 +64,14 @@ public class MainQLNV {
         public static void main(String[] args) {
 
             SwingUtilities.invokeLater(() -> {
+                //kết nối DB
+                try {
+                    conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003");
+                }catch (SQLException e){
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(null,"Không kết nối đc đến DB"+e.getMessage());
+                    System.exit(1);
+                }
 
 
                 JFrame frame = new JFrame("Quản Lý Nhân Viên");
@@ -234,16 +243,13 @@ public class MainQLNV {
                         double luong = Double.parseDouble(luongStr);
 
                         // Kiểm tra trùng mã trong DB
-                        Connection conn = DriverManager.getConnection(
-                                "jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003"
-                        );
                         PreparedStatement checkStmt = conn.prepareStatement("SELECT COUNT(*) FROM NhanVien WHERE ma_nv = ?");
                         checkStmt.setString(1, maNV);
                         ResultSet rs = checkStmt.executeQuery();
                         rs.next();
                         if (rs.getInt(1) > 0) {
                             JOptionPane.showMessageDialog(frame, "Mã nhân viên đã tồn tại!");
-                            conn.close();
+
                             return;
                         }
 
@@ -256,7 +262,6 @@ public class MainQLNV {
                         stmt.setDouble(5, luong);
                         stmt.executeUpdate();
 
-                        conn.close();
 
                         tfMaNV.setText("");
                         tfHoTen.setText("");
@@ -276,9 +281,6 @@ public class MainQLNV {
                 // Xuất danh sách ra file (xuất file DanhSachNhanVien.txt)
                 btnXuatDS.addActionListener(e -> {
                     try {
-                        Connection conn = DriverManager.getConnection(
-                                "jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003"
-                        );
                         Statement stmt = conn.createStatement();
                         ResultSet rs = stmt.executeQuery("SELECT * FROM NhanVien");
 
@@ -302,7 +304,7 @@ public class MainQLNV {
                         }
 
                         writer.close();
-                        conn.close();
+
                         JOptionPane.showMessageDialog(frame, "Đã xuất danh sách ra DanhSachNhanVien.csv");
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -317,13 +319,10 @@ public class MainQLNV {
                     String maNV = JOptionPane.showInputDialog(frame, "Nhập mã nhân viên cần xóa:");
                     if (maNV != null && !maNV.trim().isEmpty()) {
                         try {
-                            Connection conn = DriverManager.getConnection(
-                                    "jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003"
-                            );
                             PreparedStatement stmt = conn.prepareStatement("DELETE FROM NhanVien WHERE ma_nv = ?");
                             stmt.setString(1, maNV);
                             int rowsAffected = stmt.executeUpdate();
-                            conn.close();
+
                             if (rowsAffected > 0) {
                                 JOptionPane.showMessageDialog(frame, "Đã xóa nhân viên có mã " + maNV);
                                 loadnv(); //bảng cập nhật lại
@@ -345,13 +344,10 @@ public class MainQLNV {
 
                     if (confirm == JOptionPane.YES_OPTION) {
                         try {
-                            Connection conn = DriverManager.getConnection(
-                                    "jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003"
-                            );
                             Statement stmt = conn.createStatement();
                             int rowsDeleted = stmt.executeUpdate("DELETE FROM NhanVien");
 
-                            conn.close();
+
 
                             if (rowsDeleted > 0) {
                                 JOptionPane.showMessageDialog(frame, "Đã xóa toàn bộ danh sách nhân viên!");
@@ -373,7 +369,7 @@ public class MainQLNV {
                 btnCapNhat.addActionListener(e -> {
                             String maNV = JOptionPane.showInputDialog(frame, "Nhập mã nhân viên cần cập nhật:");
                             if (maNV != null && !maNV.trim().isEmpty()) {
-                                try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003")) {
+                                try {
 
                                     String sqlSelect = "SELECT * FROM NhanVien WHERE ma_nv = ?";
                                     PreparedStatement pstmt = conn.prepareStatement(sqlSelect);
@@ -407,7 +403,9 @@ public class MainQLNV {
                                             String hoTenMoi = tfhoten.getText().trim();
                                             String tuoiMoiStr = tftuoi.getText().trim();
                                             String emailMoi = tfemail.getText().trim();
-                                            String luongMoiStr = tfluong.getText().trim().replace(",", "");
+                                            int tuoiMoi = Integer.parseInt(tuoiMoiStr);
+                                            double luongMoi = ((Number) tfluong.getValue()).doubleValue();
+
 
                                             if (!hoTenMoi.matches("[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯưẠ-ỹ\\s]+")) {
                                                 JOptionPane.showMessageDialog(frame, "Họ tên chỉ được chứa chữ cái và khoảng trắng!");
@@ -419,8 +417,6 @@ public class MainQLNV {
                                                 return;
                                             }
 
-                                            int tuoiMoi = Integer.parseInt(tuoiMoiStr);
-                                            double luongMoi = ((Number) tfluong.getValue()).doubleValue();
 
                                             String sqlUpdate = "UPDATE nhanvien SET ten = ?, tuoi = ?, email = ?, luong = ? WHERE ma_nv = ?";
                                             PreparedStatement psUpdate = conn.prepareStatement(sqlUpdate);
@@ -460,9 +456,6 @@ public class MainQLNV {
                     String maNV = JOptionPane.showInputDialog(frame, "Nhập mã nhân viên cần tìm:");
                     if (maNV != null && !maNV.trim().isEmpty()) {
                         try {
-                            Connection conn = DriverManager.getConnection(
-                                    "jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003"
-                            );
                             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM NhanVien WHERE ma_nv = ?");
                             stmt.setString(1, maNV.trim());
                             ResultSet rs = stmt.executeQuery();
@@ -484,7 +477,6 @@ public class MainQLNV {
                                 JOptionPane.showMessageDialog(frame, "Không tìm thấy nhân viên có mã " + maNV);
                             }
 
-                            conn.close();
                         } catch (SQLException ex) {
                             ex.printStackTrace();
                             JOptionPane.showMessageDialog(frame, "Lỗi truy vấn: " + ex.getMessage());
@@ -561,9 +553,6 @@ public class MainQLNV {
                     try {
                         int soNguoi = Integer.parseInt(soNguoimm.trim());
 
-                        Connection conn = DriverManager.getConnection(
-                                "jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003"
-                        );
                         Statement stmt = conn.createStatement();
                         ResultSet rs = stmt.executeQuery("SELECT * FROM NhanVien");
 
@@ -608,7 +597,7 @@ public class MainQLNV {
 
                         JOptionPane.showMessageDialog(frame, sb.toString());
 
-                        conn.close();
+
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(frame, "Số người nhận thưởng phải là số hợp lệ!");
                     } catch (SQLException ex) {
@@ -658,9 +647,6 @@ public class MainQLNV {
         public static void loadnv(){
 
             try{
-                Connection conn = DriverManager.getConnection(
-                        "jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003"
-                );
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery("SELECT * FROM NhanVien");
 
@@ -675,7 +661,6 @@ public class MainQLNV {
                     double luong=rs.getDouble("luong");
                     tableModel.addRow(new Object[]{maNV, hoTen, tuoi, email, String.format("%,.0f", luong)});
                 }
-                conn.close();
             } catch (SQLException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(frame, "Lỗi khi tải dữ liệu: " + e.getMessage());
@@ -718,7 +703,6 @@ public class MainQLNV {
                         pstmt.setDouble(5, luong);
                         pstmt.addBatch();
                     } catch (NumberFormatException e) {
-                        System.err.println("Dòng bị lỗi định dạng số: " + line);
                     }
                 }
 
@@ -731,10 +715,10 @@ public class MainQLNV {
         }
 
 
-    //Hàm danh sách từ DB
+    //Hàm danh sách hóa từ DB
         private static List<NhanVien> laydanhsachtuDB(){
             List<NhanVien> danhSach=new ArrayList<>();
-            try(Connection conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/jdbc_test", "Trong", "31122003")) {
+            try {
                 String sql="SELECT *FROM NhanVien";
                 Statement stmt=conn.createStatement();
                 ResultSet rs =stmt.executeQuery(sql);

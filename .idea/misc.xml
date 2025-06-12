@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/B9ORM/pom.xml" />
+        <option value="$PROJECT_DIR$/B10JDBC/pom.xml" />
+        <option value="$PROJECT_DIR$/B10QLNV/pom.xml" />
+        <option value="$PROJECT_DIR$/B11QLNV/pom.xml" />
+        <option value="$PROJECT_DIR$/B12QLNVv2/pom.xml" />
+        <option value="$PROJECT_DIR$/AppDuBaoThoiTiet/pom.xml" />
+        <option value="$PROJECT_DIR$/Games/FlyShooter/pom.xml" />
+        <option value="$PROJECT_DIR$/B13DB/pom.xml" />
+        <option value="$PROJECT_DIR$/demo/pom.xml" />
+        <option value="$PROJECT_DIR$/demoSpringBoot/pom.xml" />
+        <option value="$PROJECT_DIR$/PosCafe/pom.xml" />
+        <option value="$PROJECT_DIR$/TestApp/pom.xml" />
+        <option value="$PROJECT_DIR$/TestAppFontend/pom.xml" />
+        <option value="$PROJECT_DIR$/QuizApp/TestApp/pom.xml" />
+        <option value="$PROJECT_DIR$/QuizApp/TestAppFontend/pom.xml" />
+        <option value="$PROJECT_DIR$/websocket-demo/pom.xml" />
+        <option value="$PROJECT_DIR$/CaroGame/pom.xml" />
+        <option value="$PROJECT_DIR$/QLNV/pom.xml" />
+        <option value="$PROJECT_DIR$/Project TT/QLNV/pom.xml" />
+        <option value="$PROJECT_DIR$/QLNV_Swing/pom.xml" />
+        <option value="$PROJECT_DIR$/ProjectQlnv/pom.xml" />
+      </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/QLNV/pom.xml" />
+        <option value="$PROJECT_DIR$/QLNV_Swing/pom.xml" />
+        <option value="$PROJECT_DIR$/demoSpringBoot/pom.xml" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="17" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>

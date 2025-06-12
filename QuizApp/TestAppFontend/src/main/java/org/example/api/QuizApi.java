@@ -76,7 +76,7 @@ public class QuizApi {
                 .url(BASE_URL + "/" + id)
                 .put(body)
                 .build();
-        try (Response response = client.newCall(request).execute()) {
+        try (Response response = client.newCall(request).execute()) { 
             return response.isSuccessful();
         } catch (IOException e) {
             e.printStackTrace();

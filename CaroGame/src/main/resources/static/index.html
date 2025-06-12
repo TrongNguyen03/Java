@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Caro Online</title>
+    <script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/2.3.4/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #ffffff, #e0f7ff);
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h2 { color: #007bff; }
+        #playerInfo { font-size: 16px; margin-bottom: 10px; }
+        #scoreBoard {
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: #333;
+        }
+        #board {
+            border-collapse: collapse;
+            margin: 20px auto;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+        }
+        td {
+            width: 35px; height: 35px; border: 1px solid #aaa;
+            font-size: 20px; cursor: pointer; text-align: center; vertical-align: middle; transition: background 0.3s;
+        }
+        td:hover { background-color: #e6f2ff; }
+        td.X { color: red; font-weight: bold; }
+        td.O { color: green; font-weight: bold; }
+        .footer { margin-top: 30px; font-size: 14px; color: #555; }
+        #leaveBtn {
+            padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;
+        }
+        #leaveBtn:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+
+<h2>🎯 Game Caro Online</h2>
+<p id="playerInfo">Chào <span id="playerName"></span>! Bạn là: <strong id="playerSymbol">(đang chờ...)</strong></p>
+<div id="scoreBoard">
+    <strong>Tỉ số:</strong>
+    <span id="scoreA">--</span>
+</div>
+<button id="leaveBtn">Rời khỏi trận đấu</button>
+<table id="board"></table>
+<div class="footer">
+    © 2025 Game Caro Online - Powered by Spring Boot & WebSocket
+</div>
+
+<script>
+    const boardSize = 20;
+    const board = document.getElementById("board");
+    const playerName = prompt("Nhập tên của bạn:").trim();
+    document.getElementById("playerName").textContent = playerName;
+
+    let playerSymbol = null;
+    let currentTurn = "X";
+    let stompClient = null;
+    let boardData = Array.from({ length: boardSize }, () => Array(boardSize).fill(""));
+    let players = {};
+    let scores = {};
+
+    // Hai biến lưu cố định tên 2 người chơi xuất hiện đầu tiên
+    let playerName1 = null;
+    let playerName2 = null;
+
+    // Tạo bảng
+    for (let i = 0; i < boardSize; i++) {
+        const row = board.insertRow();
+        for (let j = 0; j < boardSize; j++) {
+            const cell = row.insertCell();
+            cell.dataset.x = i;
+            cell.dataset.y = j;
+        }
+    }
+
+    // Cập nhật bảng
+    function updateBoard(data) {
+        for (let i = 0; i < boardSize; i++) {
+            for (let j = 0; j < boardSize; j++) {
+                const cell = board.rows[i].cells[j];
+                const value = data[i][j];
+                cell.textContent = value;
+                cell.className = value;
+            }
+        }
+    }
+
+    // Gán biểu tượng cho người chơi
+    function assignSymbol(name, playerMap) {
+        for (const symbol in playerMap) {
+            if (playerMap[symbol] === name) {
+                return symbol;
+            }
+        }
+        return null;
+    }
+
+    // Cập nhật score
+    function updateScores(scores) {
+        if (playerName1 && playerName2) {
+            document.getElementById("scoreA").textContent =
+                `${playerName1}: ${scores[playerName1] ?? 0} | ${playerName2}: ${scores[playerName2] ?? 0}`;
+        } else if (playerName1) {
+            document.getElementById("scoreA").textContent =
+                `${playerName1}: ${scores[playerName1] ?? 0}`;
+        } else {
+            document.getElementById("scoreA").textContent = "--";
+        }
+    }
+
+    // Kết nối WebSocket
+    window.onload = function () {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function () {
+            console.log("🔗 WebSocket đã kết nối");
+
+            stompClient.subscribe('/topic/board', function (message) {
+                const data = JSON.parse(message.body);
+                boardData = data.board;
+                currentTurn = data.turn;
+                players = data.players;
+                scores = data.scores;
+
+                // Khi đủ 2 người chơi và chưa set tên cố định thì lấy luôn tên, sau này không thay đổi nữa
+                const names = Object.values(players);
+                if (names.length === 2 && (!playerName1 || !playerName2)) {
+                    [playerName1, playerName2] = names;
+                }
+
+                // Nếu có người rời phòng, reset hai biến tên (và bảng tỉ số sẽ hiển thị lại "--")
+                if (names.length < 2) {
+                    playerName1 = names[0] || null;
+                    playerName2 = null;
+                }
+
+                if (!playerSymbol || !players[playerSymbol] || players[playerSymbol] !== playerName) {
+                    playerSymbol = assignSymbol(playerName, players);
+                    document.getElementById("playerSymbol").textContent = playerSymbol || "(chờ phân công...)";
+                }
+
+                updateBoard(boardData);
+                updateScores(scores);
+
+            });
+
+            // Gửi thông tin đăng ký người chơi
+            stompClient.send("/app/register", {}, JSON.stringify({ name: playerName }));
+        });
+    };
+
+    // Gửi nước đi
+    board.addEventListener("click", function (e) {
+        const cell = e.target;
+        if (cell.tagName !== "TD") return;
+
+        const x = parseInt(cell.dataset.x);
+        const y = parseInt(cell.dataset.y);
+
+        if (boardData[x][y] !== "" || currentTurn !== playerSymbol) return;
+
+        stompClient.send("/app/move", {}, JSON.stringify({
+            x: x,
+            y: y,
+            player: playerSymbol
+        }));
+    });
+
+    // Rời khỏi trận đấu
+    document.getElementById("leaveBtn").addEventListener("click", function () {
+        if (stompClient && playerName) {
+            stompClient.send("/app/leave", {}, JSON.stringify({ name: playerName }));
+            alert("🚪 Bạn đã rời khỏi trận đấu.");
+            window.location.reload();
+        }
+    });
+
+    // Gửi tín hiệu rời nếu đóng tab
+    window.addEventListener("beforeunload", function () {
+        if (stompClient && playerName) {
+            stompClient.send("/app/leave", {}, JSON.stringify({ name: playerName }));
+        }
+    });
+</script>
+
+</body>
+</html>
