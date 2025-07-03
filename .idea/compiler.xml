@@ -22,18 +22,19 @@
         <module name="WeatherApp" />
         <module name="CaroGame" />
       </profile>
-      <profile name="Annotation profile for ProjectQlnv" enabled="true">
+      <profile name="Annotation profile for qlnv" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="ProjectQlnv" />
+        <module name="qlnv" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="demoSpringBoot" target="17" />
+      <module name="ProjectQlnv" target="17" />
       <module name="QLNV" target="17" />
       <module name="QLNV_Swing" target="17" />
       <module name="TestAppFontend" target="17" />
@@ -48,6 +49,7 @@
       <module name="TestApp" options="-parameters" />
       <module name="demoSpringBoot" options="-parameters" />
       <module name="pos-cafe" options="-parameters" />
+      <module name="qlnv" options="-parameters" />
       <module name="websocket-demo." options="-parameters" />
     </option>
   </component>

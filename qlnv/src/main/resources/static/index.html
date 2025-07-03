@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Nhân Viên & Chấm Công</title>
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let token = localStorage.getItem('token') || '';
+        let role = localStorage.getItem('role') || '';
+
+        function setAuthHeaders(headers = {}) {
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            return headers;
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const res = await fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                token = data.token;
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                role = payload.role;
+                localStorage.setItem('token', token);
+                localStorage.setItem('role', role);
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                initByRole();
+            } else {
+                alert('Đăng nhập thất bại');
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        function initByRole() {
+            document.getElementById('role-display').innerText = role;
+            if (role === 'ADMIN') {
+                document.getElementById('admin-panel').style.display = 'block';
+                loadNhanVien();
+                loadNhanVienDropdown();
+                loadChamCong();
+            } else {
+                document.getElementById('nhanvien-panel').style.display = 'block';
+            }
+        }
+
+        async function loadNhanVien() {
+            const res = await fetch(`${API_BASE}/nhanvien`, {
+                headers: setAuthHeaders()
+            });
+            const data = await res.json();
+            const tbody = document.getElementById('nhanvien-body');
+            tbody.innerHTML = '';
+            data.forEach(nv => {
+                const row = `<tr>
+                    <td>${nv.maNv}</td>
+                    <td>${nv.ten}</td>
+                    <td>${nv.tuoi}</td>
+                    <td>${nv.email}</td>
+                    <td>${nv.luong}</td>
+                    <td><button onclick="deleteNhanVien('${nv.maNv}')">Xóa</button></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        async function loadNhanVienDropdown() {
+            const res = await fetch(`${API_BASE}/nhanvien`, {
+                headers: setAuthHeaders()
+            });
+            const data = await res.json();
+            const select = document.getElementById('tk-maNv');
+            select.innerHTML = '';
+            data.forEach(nv => {
+                const option = document.createElement('option');
+                option.value = nv.maNv;
+                option.text = `${nv.maNv} - ${nv.ten}`;
+                select.appendChild(option);
+            });
+        }
+
+        async function addNhanVien() {
+            const nv = {
+                maNv: document.getElementById('maNv').value,
+                ten: document.getElementById('ten').value,
+                tuoi: parseInt(document.getElementById('tuoi').value),
+                email: document.getElementById('email').value,
+                luong: parseFloat(document.getElementById('luong').value)
+            };
+
+            await fetch(`${API_BASE}/nhanvien`, {
+                method: 'POST',
+                headers: setAuthHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify(nv)
+            });
+            loadNhanVien();
+            loadNhanVienDropdown();
+        }
+
+        async function deleteNhanVien(maNv) {
+        const confirmDelete = confirm("Bạn có chắc muốn xóa nhân viên này?");
+        if (!confirmDelete) return;
+
+        const res = await fetch(`${API_BASE}/nhanvien/${maNv}`, {
+            method: 'DELETE',
+            headers: setAuthHeaders()
+        });
+
+        if (res.ok) {
+            alert("✅ Đã xóa nhân viên");
+            loadNhanVien();
+            loadNhanVienDropdown();
+        } else {
+            const msg = await res.text();
+            alert("Thông báo: " + msg);
+        }
+    }
+
+
+        async function createTaiKhoan() {
+            const username = document.getElementById('tk-username').value;
+            const password = document.getElementById('tk-password').value;
+            const role = document.getElementById('tk-role').value;
+            const maNv = document.getElementById('tk-maNv').value;
+
+            const tk = { username, password, role, maNv };
+            const res = await fetch(`${API_BASE}/auth/create-account`, {
+                method: 'POST',
+                headers: setAuthHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify(tk)
+            });
+
+            if (res.ok) {
+                alert('✅ Tạo tài khoản thành công!');
+            } else {
+                const err = await res.text();
+                alert('❌ Tạo tài khoản thất bại: ' + err);
+            }
+        }
+
+        async function importNhanVienExcel() {
+            const fileInput = document.getElementById('importFile');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            await fetch(`${API_BASE}/nhanvien/import-excel`, {
+                method: 'POST',
+                headers: setAuthHeaders(),
+                body: formData
+            });
+            loadNhanVien();
+        }
+
+        async function exportNhanVienExcel() {
+            const res = await fetch(`${API_BASE}/nhanvien/export-excel`, {
+                method: 'GET',
+                headers: setAuthHeaders()
+            });
+            if (!res.ok) {
+                const msg = await res.text();
+                alert("❌ Xuất Excel nhân viên thất bại: " + msg);
+                return;
+            }
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'DanhSachNhanVien.xlsx';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        async function exportChamCongExcel() {
+            const thang = parseInt(document.getElementById('cc-thang').value);
+            const nam = parseInt(document.getElementById('cc-nam').value);
+
+            if (!thang || !nam || thang < 1 || thang > 12 || nam < 2000) {
+                alert("❌ Vui lòng nhập tháng (1-12) và năm hợp lệ");
+                return;
+            }
+
+            const res = await fetch(`${API_BASE}/chamcong/export-excel?thang=${thang}&nam=${nam}`, {
+                method: 'GET',
+                headers: setAuthHeaders()
+            });
+
+            if (!res.ok) {
+                const msg = await res.text();
+                alert("❌ Xuất Excel chấm công thất bại: " + msg);
+                return;
+            }
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ChamCong_${thang}_${nam}.xlsx`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        async function loadChamCong() {
+            const res = await fetch(`${API_BASE}/chamcong`, {
+                headers: setAuthHeaders()
+            });
+            const data = await res.json();
+            const tbody = document.getElementById('cc-body');
+            tbody.innerHTML = '';
+            data.forEach(cc => {
+                const row = `<tr>
+                    <td>${cc.nhanVien.maNv}</td>
+                    <td>${cc.nhanVien.ten}</td>
+                    <td>${cc.thang}/${cc.nam}</td>
+                    <td>${cc.soNgayCong}</td>
+                    <td>${cc.soNgayNghi}</td>
+                    <td>${cc.luongThucNhan || ''}</td>
+                    <td>${cc.ghiChu || ''}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // ✅ Check In/Out có gửi ghi chú
+        async function checkIn() {
+            const ghiChu = document.getElementById('note').value;
+            const res = await fetch(`${API_BASE}/chamcong-ngay/checkin`, {
+                method: 'POST',
+                headers: setAuthHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ ghiChu })
+            });
+            const msg = await res.text();
+            if (res.ok) {
+                alert("✅ " + msg);
+            } else {
+                alert("⚠️ " + msg);
+            }
+        }
+
+        async function checkOut() {
+            const ghiChu = document.getElementById('note').value;
+            const res = await fetch(`${API_BASE}/chamcong-ngay/checkout`, {
+                method: 'POST',
+                headers: setAuthHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ ghiChu })
+            });
+            const msg = await res.text();
+            if (res.ok) {
+                alert("✅ " + msg);
+            } else {
+                alert("⚠️ " + msg);
+            }
+        }
+
+        window.onload = () => {
+            if (token) {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                initByRole();
+            }
+        }
+    </script>
+</head>
+<body>
+<div id="login-form">
+    <h2>Đăng nhập</h2>
+    <input id="username" placeholder="Tài khoản">
+    <input id="password" type="password" placeholder="Mật khẩu">
+    <button onclick="login()">Đăng nhập</button>
+</div>
+
+<div id="main-app" style="display:none">
+    <h2>Xin chào, vai trò: <span id="role-display"></span> <button onclick="logout()">Đăng xuất</button></h2>
+
+    <div id="admin-panel" style="display:none">
+        <h1>Quản Lý Nhân Viên</h1>
+        <table border="1">
+            <thead><tr><th>Mã NV</th><th>Tên</th><th>Tuổi</th><th>Email</th><th>Lương</th><th>Hành động</th></tr></thead>
+            <tbody id="nhanvien-body"></tbody>
+        </table>
+
+        <h3>Thêm Nhân Viên</h3>
+        <input id="maNv" placeholder="Mã NV">
+        <input id="ten" placeholder="Tên">
+        <input id="tuoi" placeholder="Tuổi" type="number">
+        <input id="email" placeholder="Email">
+        <input id="luong" placeholder="Lương" type="number">
+        <button onclick="addNhanVien()">Lưu</button>
+
+        <h3>Nhập/Xuất Excel Nhân Viên</h3>
+        <input type="file" id="importFile">
+        <button onclick="importNhanVienExcel()">Nhập Excel</button>
+        <button onclick="exportNhanVienExcel()">Xuất Excel</button>
+
+        <h3>Tạo tài khoản cho nhân viên</h3>
+        <input id="tk-username" placeholder="Username">
+        <input id="tk-password" type="password" placeholder="Mật khẩu">
+        <select id="tk-role">
+            <option value="NHANVIEN">NHANVIEN</option>
+            <option value="ADMIN">ADMIN</option>
+        </select>
+        <select id="tk-maNv"></select>
+        <button onclick="createTaiKhoan()">Tạo tài khoản</button>
+    </div>
+
+    <div id="nhanvien-panel" style="display:none">
+        <h2>Chấm Công Ngày</h2>
+        <textarea id="note" placeholder="Ghi chú nếu có (ví dụ: nghỉ sớm, vào muộn...)"></textarea><br>
+        <button onclick="checkIn()">Check In</button>
+        <button onclick="checkOut()">Check Out</button>
+    </div>
+
+    <hr>
+    <h1>Báo Cáo Chấm Công Tháng</h1>
+    <table border="1">
+        <thead><tr><th>Mã NV</th><th>Tên</th><th>Tháng/Năm</th><th>Ngày công</th><th>Ngày nghỉ</th><th>Lương</th><th>Ghi chú</th></tr></thead>
+        <tbody id="cc-body"></tbody>
+    </table>
+    <h3>Xuất báo cáo chấm công theo tháng</h3>
+    <input id="cc-thang" placeholder="Tháng" type="number">
+    <input id="cc-nam" placeholder="Năm" type="number">
+    <button onclick="exportChamCongExcel()">Xuất Excel CC</button>
+</div>
+</body>
+</html>
