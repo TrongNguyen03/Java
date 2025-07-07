@@ -33,7 +33,7 @@ public class ChamCongNgayService {
         cc.setNhanVien(nv);
         cc.setNgay(today);
         cc.setGioCheckIn(LocalTime.now());
-        cc.setGhiChu(ghiChu);  // 💡 Lưu ghi chú nếu có
+        cc.setGhiChu(ghiChu);  // Lưu ghi chú nếu có
         chamCongNgayRepo.save(cc);
     }
 
@@ -51,7 +51,7 @@ public class ChamCongNgayService {
 
         cc.setGioCheckOut(LocalTime.now());
 
-        // 💡 Nếu có ghi chú lúc check-out thì gộp vào hoặc cập nhật
+        //Nếu có ghi chú lúc check-out thì gộp vào hoặc cập nhật
         if (ghiChu != null && !ghiChu.isBlank()) {
             String currentNote = cc.getGhiChu() == null ? "" : cc.getGhiChu() + " | ";
             cc.setGhiChu(currentNote + ghiChu);

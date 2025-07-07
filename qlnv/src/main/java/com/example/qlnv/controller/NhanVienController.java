@@ -1,6 +1,7 @@
 package com.example.qlnv.controller;
 
 import com.example.qlnv.entity.NhanVien;
+import com.example.qlnv.repository.NhanVienRepository;
 import com.example.qlnv.service.NhanVienService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
@@ -23,6 +24,7 @@ public class NhanVienController {
 
     private final NhanVienService service;
     private final NhanVienService nhanVienService;
+    private final NhanVienRepository nhanVienRepository;
 
     @GetMapping
     public List<NhanVien> getAll() {
@@ -55,6 +57,11 @@ public class NhanVienController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("❌ Lỗi hệ thống: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/chua-co-tai-khoan")
+    public List<NhanVien> getNhanVienChuaCoTaiKhoan() {
+        return nhanVienRepository.findNhanVienChuaCoTaiKhoan();
     }
 
     @PostMapping("/import-excel")

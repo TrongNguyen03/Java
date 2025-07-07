@@ -30,7 +30,7 @@ public class TaiKhoanService {
         TaiKhoan tk = new TaiKhoan();
         tk.setUsername(request.getUsername());
         tk.setPassword(passwordEncoder.encode(request.getPassword()));
-        tk.setRole(Role.NHANVIEN); // hoặc từ request nếu muốn linh hoạt
+        tk.setRole(Role.NHANVIEN);
         tk.setNhanVien(nv);
 
         taiKhoanRepo.save(tk);

@@ -3,6 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <title>Quản Lý Nhân Viên & Chấm Công</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        #main-app, #login-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            margin: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        table thead {
+            background-color: #e0e0e0;
+            font-weight: bold;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        input[type="number"][id^="cc-"] {
+            width: 120px;
+            display: inline-block;
+        }
+
+        input, select, button, textarea {
+            padding: 8px;
+            margin: 5px 0;
+            width: calc(100% - 20px);
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .search-input {
+            margin-bottom: 10px;
+        }
+    </style>
     <script>
         const API_BASE = 'http://localhost:8080/api';
         let token = localStorage.getItem('token') || '';
@@ -56,19 +115,18 @@
         }
 
         async function loadNhanVien() {
-            const res = await fetch(`${API_BASE}/nhanvien`, {
-                headers: setAuthHeaders()
-            });
+            const res = await fetch(`${API_BASE}/nhanvien`, { headers: setAuthHeaders() });
             const data = await res.json();
             const tbody = document.getElementById('nhanvien-body');
+            const keyword = document.getElementById('search-nv').value.toLowerCase();
             tbody.innerHTML = '';
-            data.forEach(nv => {
+            data.filter(nv => nv.ten.toLowerCase().includes(keyword) || nv.maNv.toLowerCase().includes(keyword)).forEach(nv => {
                 const row = `<tr>
                     <td>${nv.maNv}</td>
                     <td>${nv.ten}</td>
                     <td>${nv.tuoi}</td>
                     <td>${nv.email}</td>
-                    <td>${nv.luong}</td>
+                    <td>${nv.luong.toLocaleString('vi-VN')}</td>
                     <td><button onclick="deleteNhanVien('${nv.maNv}')">Xóa</button></td>
                 </tr>`;
                 tbody.innerHTML += row;
@@ -76,7 +134,7 @@
         }
 
         async function loadNhanVienDropdown() {
-            const res = await fetch(`${API_BASE}/nhanvien`, {
+            const res = await fetch(`${API_BASE}/nhanvien/chua-co-tai-khoan`, {
                 headers: setAuthHeaders()
             });
             const data = await res.json();
@@ -89,6 +147,7 @@
                 select.appendChild(option);
             });
         }
+
 
         async function addNhanVien() {
             const nv = {
@@ -109,24 +168,21 @@
         }
 
         async function deleteNhanVien(maNv) {
-        const confirmDelete = confirm("Bạn có chắc muốn xóa nhân viên này?");
-        if (!confirmDelete) return;
-
-        const res = await fetch(`${API_BASE}/nhanvien/${maNv}`, {
-            method: 'DELETE',
-            headers: setAuthHeaders()
-        });
-
-        if (res.ok) {
-            alert("✅ Đã xóa nhân viên");
-            loadNhanVien();
-            loadNhanVienDropdown();
-        } else {
-            const msg = await res.text();
-            alert("Thông báo: " + msg);
+            const confirmDelete = confirm("Bạn có chắc muốn xóa nhân viên này?");
+            if (!confirmDelete) return;
+            const res = await fetch(`${API_BASE}/nhanvien/${maNv}`, {
+                method: 'DELETE',
+                headers: setAuthHeaders()
+            });
+            if (res.ok) {
+                alert("✅ Đã xóa nhân viên");
+                loadNhanVien();
+                loadNhanVienDropdown();
+            } else {
+                const msg = await res.text();
+                alert("Thông báo: " + msg);
+            }
         }
-    }
-
 
         async function createTaiKhoan() {
             const username = document.getElementById('tk-username').value;
@@ -149,18 +205,27 @@
             }
         }
 
-        async function importNhanVienExcel() {
+       async function importNhanVienExcel() {
             const fileInput = document.getElementById('importFile');
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
-            await fetch(`${API_BASE}/nhanvien/import-excel`, {
+            const res = await fetch(`${API_BASE}/nhanvien/import-excel`, {
                 method: 'POST',
                 headers: setAuthHeaders(),
                 body: formData
             });
+
+            if (res.ok) {
+                alert("✅ Nhập Excel thành công!");
+            } else {
+                const msg = await res.text();
+                alert("❌ Nhập Excel thất bại: " + msg);
+            }
+
             loadNhanVien();
         }
+
 
         async function exportNhanVienExcel() {
             const res = await fetch(`${API_BASE}/nhanvien/export-excel`, {
@@ -184,23 +249,19 @@
         async function exportChamCongExcel() {
             const thang = parseInt(document.getElementById('cc-thang').value);
             const nam = parseInt(document.getElementById('cc-nam').value);
-
             if (!thang || !nam || thang < 1 || thang > 12 || nam < 2000) {
                 alert("❌ Vui lòng nhập tháng (1-12) và năm hợp lệ");
                 return;
             }
-
             const res = await fetch(`${API_BASE}/chamcong/export-excel?thang=${thang}&nam=${nam}`, {
                 method: 'GET',
                 headers: setAuthHeaders()
             });
-
             if (!res.ok) {
                 const msg = await res.text();
                 alert("❌ Xuất Excel chấm công thất bại: " + msg);
                 return;
             }
-
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -216,22 +277,22 @@
             });
             const data = await res.json();
             const tbody = document.getElementById('cc-body');
+            const keyword = document.getElementById('search-cc').value.toLowerCase();
             tbody.innerHTML = '';
-            data.forEach(cc => {
+            data.filter(cc => cc.nhanVien.ten.toLowerCase().includes(keyword) || cc.nhanVien.maNv.toLowerCase().includes(keyword)).forEach(cc => {
                 const row = `<tr>
                     <td>${cc.nhanVien.maNv}</td>
                     <td>${cc.nhanVien.ten}</td>
                     <td>${cc.thang}/${cc.nam}</td>
                     <td>${cc.soNgayCong}</td>
                     <td>${cc.soNgayNghi}</td>
-                    <td>${cc.luongThucNhan || ''}</td>
+                    <td>${cc.luongThucNhan ? cc.luongThucNhan.toLocaleString('vi-VN') : ''}</td>
                     <td>${cc.ghiChu || ''}</td>
                 </tr>`;
                 tbody.innerHTML += row;
             });
         }
 
-        // ✅ Check In/Out có gửi ghi chú
         async function checkIn() {
             const ghiChu = document.getElementById('note').value;
             const res = await fetch(`${API_BASE}/chamcong-ngay/checkin`, {
@@ -240,11 +301,7 @@
                 body: JSON.stringify({ ghiChu })
             });
             const msg = await res.text();
-            if (res.ok) {
-                alert("✅ " + msg);
-            } else {
-                alert("⚠️ " + msg);
-            }
+            alert((res.ok ? "✅ " : "⚠️ ") + msg);
         }
 
         async function checkOut() {
@@ -255,11 +312,7 @@
                 body: JSON.stringify({ ghiChu })
             });
             const msg = await res.text();
-            if (res.ok) {
-                alert("✅ " + msg);
-            } else {
-                alert("⚠️ " + msg);
-            }
+            alert((res.ok ? "✅ " : "⚠️ ") + msg);
         }
 
         window.onload = () => {
@@ -281,14 +334,13 @@
 
 <div id="main-app" style="display:none">
     <h2>Xin chào, vai trò: <span id="role-display"></span> <button onclick="logout()">Đăng xuất</button></h2>
-
     <div id="admin-panel" style="display:none">
         <h1>Quản Lý Nhân Viên</h1>
-        <table border="1">
+        <input class="search-input" id="search-nv" placeholder="Tìm kiếm nhân viên..." oninput="loadNhanVien()">
+        <table>
             <thead><tr><th>Mã NV</th><th>Tên</th><th>Tuổi</th><th>Email</th><th>Lương</th><th>Hành động</th></tr></thead>
             <tbody id="nhanvien-body"></tbody>
         </table>
-
         <h3>Thêm Nhân Viên</h3>
         <input id="maNv" placeholder="Mã NV">
         <input id="ten" placeholder="Tên">
@@ -322,7 +374,8 @@
 
     <hr>
     <h1>Báo Cáo Chấm Công Tháng</h1>
-    <table border="1">
+    <input class="search-input" id="search-cc" placeholder="Tìm kiếm mã NV hoặc tên..." oninput="loadChamCong()">
+    <table>
         <thead><tr><th>Mã NV</th><th>Tên</th><th>Tháng/Năm</th><th>Ngày công</th><th>Ngày nghỉ</th><th>Lương</th><th>Ghi chú</th></tr></thead>
         <tbody id="cc-body"></tbody>
     </table>

@@ -28,9 +28,4 @@ public class ChamCong {
 
     private String ghiChu;
 
-    @Transient
-    public double getLuongTinhToan() {
-        // Trường hợp không lưu lương trong DB hàm này để hiển thị
-        return Math.round(nhanVien.getLuong() * soNgayCong / 26.0 * 100.0) / 100.0;
-    }
 }
