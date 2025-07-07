@@ -1,4 +1,4 @@
-package com.example.qlnv.service.internal;
+package com.example.qlnv.service.impl;
 
 import com.example.qlnv.entity.ChamCongNgay;
 import com.example.qlnv.entity.NhanVien;
