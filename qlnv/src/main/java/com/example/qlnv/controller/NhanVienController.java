@@ -49,13 +49,13 @@ public class NhanVienController {
             return ResponseEntity.ok().build();
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("❌ Không thể xóa vì nhân viên đang có dữ liệu liên quan (chấm công hoặc tài khoản)");
+                    .body("Không thể xóa vì nhân viên đang có dữ liệu liên quan (chấm công hoặc tài khoản)");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("❌ Lỗi hệ thống: " + e.getMessage());
+                    .body("Lỗi hệ thống: " + e.getMessage());
         }
     }
 

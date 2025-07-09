@@ -316,12 +316,14 @@
         }
 
         window.onload = () => {
-            if (token) {
-                document.getElementById('login-form').style.display = 'none';
-                document.getElementById('main-app').style.display = 'block';
-                initByRole();
-            }
-        }
+            // Xóa token cũ để luôn vào giao diện đăng nhập trước
+            localStorage.clear();
+            token = '';
+            role = '';
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('main-app').style.display = 'none';
+        };
+
     </script>
 </head>
 <body>

@@ -20,7 +20,7 @@ public class JWTUtil {
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SECRET_KEY, SignatureAlgorithm.HS256) // ✅ sử dụng Key object
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS256) // sử dụng Key object
                 .compact();
     }
 
