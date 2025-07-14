@@ -29,6 +29,9 @@ public class ChamCongNgay {
     @Column(name = "ghi_chu")
     private String ghiChu;
 
+    @Column(name = "so_cong")
+    private Double soCong;
+
     @PrePersist
     public void prePersist() {
         if (ngay == null) {

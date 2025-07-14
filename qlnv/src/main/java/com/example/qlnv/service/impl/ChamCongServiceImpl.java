@@ -30,7 +30,7 @@ public class ChamCongServiceImpl implements ChamCongService {
     private final ChamCongNgayRepository chamCongNgayRepo;
     private final NhanVienRepository nhanVienRepo;
 
-    private double tinhLuongThucNhan(NhanVien nv, int soNgayCong) {
+    private double tinhLuongThucNhan(NhanVien nv, double soNgayCong) {
         return Math.round(nv.getLuong() * soNgayCong / 26.0 * 100.0) / 100.0;
     }
 
@@ -125,9 +125,14 @@ public class ChamCongServiceImpl implements ChamCongService {
             List<ChamCongNgay> congNgayList = chamCongNgayRepo
                     .findByNhanVienMaNvAndNgayBetween(nv.getMaNv(), start, end);
 
-            int soNgayCong = (int) congNgayList.stream().filter(cc -> cc.getGioCheckIn() != null).count();
-            int soNgayNghi = 26 - soNgayCong;
+            // Tính tổng số công
+            double tongSoCong = congNgayList.stream()
+                    .mapToDouble(cc -> cc.getSoCong() != null ? cc.getSoCong() : 0)
+                    .sum();
 
+            double soNgayNghi = 26 - tongSoCong;
+
+            // Lấy hoặc tạo bản ghi chấm công tháng
             ChamCong chamCong = chamCongRepo
                     .findByNhanVien_MaNvAndThangAndNam(nv.getMaNv(), thang, nam)
                     .orElse(new ChamCong());
@@ -135,11 +140,13 @@ public class ChamCongServiceImpl implements ChamCongService {
             chamCong.setNhanVien(nv);
             chamCong.setThang(thang);
             chamCong.setNam(nam);
-            chamCong.setSoNgayCong(soNgayCong);
-            chamCong.setSoNgayNghi(soNgayNghi);
-            chamCong.setLuongThucNhan(tinhLuongThucNhan(nv, soNgayCong));
+            chamCong.setSoNgayCong(tongSoCong);
+            chamCong.setSoNgayNghi((int) soNgayNghi);
+
+            chamCong.setLuongThucNhan(tinhLuongThucNhan(nv, tongSoCong));
 
             chamCongRepo.save(chamCong);
         }
     }
+
 }

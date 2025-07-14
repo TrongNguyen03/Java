@@ -21,7 +21,7 @@ public class ChamCong {
 
     private int thang;
     private int nam;
-    private int soNgayCong;
+    private double soNgayCong;
     private int soNgayNghi;
 
     private Double luongThucNhan;

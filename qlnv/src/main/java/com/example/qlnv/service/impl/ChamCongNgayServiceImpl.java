@@ -52,8 +52,24 @@ public class ChamCongNgayServiceImpl implements ChamCongNgayService {
             throw new IllegalStateException("Đã check-out hôm nay");
         }
 
-        cc.setGioCheckOut(LocalTime.now());
+        LocalTime gioRa = LocalTime.now();
+        cc.setGioCheckOut(gioRa);
 
+        // Tính số giờ làm việc
+        long gioLam = java.time.Duration.between(cc.getGioCheckIn(), gioRa).toHours();
+        double soCong;
+
+        if (gioLam >= 8) {
+            soCong = 1.0;
+        } else if (gioLam >= 4) {
+            soCong = 0.5;
+        } else {
+            soCong = 0.0;
+        }
+
+        cc.setSoCong(soCong);
+
+        // Ghi chú bổ sung
         if (ghiChu != null && !ghiChu.isBlank()) {
             String currentNote = cc.getGhiChu() == null ? "" : cc.getGhiChu() + " | ";
             cc.setGhiChu(currentNote + ghiChu);
@@ -61,4 +77,5 @@ public class ChamCongNgayServiceImpl implements ChamCongNgayService {
 
         chamCongNgayRepo.save(cc);
     }
+
 }
